@@ -16,12 +16,27 @@ def signup():
     if request.method == 'POST':
         username = request.form['username']
         email = request.form['email']
-        password = generate_password_hash(request.form['password'])
+        password = request.form['password']
 
-        user = User(username=username, email=email, password=password)
+        # Check if email already exists
+        if User.query.filter_by(email=email).first():
+            flash('Email already registered. Please use a different email or login.')
+            return redirect(url_for('main.signup'))
+        
+        # Check if username already exists
+        if User.query.filter_by(username=username).first():
+            flash('Username already taken. Please choose a different username.')
+            return redirect(url_for('main.signup'))
+
+        # Create new user
+        user = User(
+            username=username,
+            email=email,
+            password=generate_password_hash(password)
+        )
         db.session.add(user)
         db.session.commit()
-        flash('Signup successful. Please log in.')
+        flash('Signup successful! Please log in.')
         return redirect(url_for('main.login'))
     return render_template('signup.html')
 
