@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, login_required, logout_user, current_user
 from .models import db, User, Transaction
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import date
+from datetime import date, datetime
+from sqlalchemy import extract, func
 
 main = Blueprint('main', __name__)
 
@@ -43,11 +44,67 @@ def logout():
 @main.route('/dashboard')
 @login_required
 def dashboard():
+    # Get current month's transactions
+    current_month = date.today().month
+    current_year = date.today().year
+    
+    # Get all transactions for the current month
+    monthly_transactions = Transaction.query.filter(
+        Transaction.user_id == current_user.id,
+        extract('month', Transaction.date) == current_month,
+        extract('year', Transaction.date) == current_year
+    ).order_by(Transaction.date.desc()).all()
+    
+    # Get all transactions for the current day
     today = date.today()
-    transactions = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.date.desc()).all()
-    income = sum(t.amount for t in transactions if t.type == 'income')
-    expenses = sum(t.amount for t in transactions if t.type == 'expense')
-    return render_template('dashboard.html', transactions=transactions, income=income, expenses=expenses)
+    daily_transactions = Transaction.query.filter(
+        Transaction.user_id == current_user.id,
+        Transaction.date == today
+    ).order_by(Transaction.date.desc()).all()
+    
+    # Calculate monthly totals
+    monthly_income = sum(t.amount for t in monthly_transactions if t.type == 'income')
+    monthly_expenses = sum(t.amount for t in monthly_transactions if t.type == 'expense')
+    monthly_balance = monthly_income - monthly_expenses
+    
+    # Calculate daily totals
+    daily_income = sum(t.amount for t in daily_transactions if t.type == 'income')
+    daily_expenses = sum(t.amount for t in daily_transactions if t.type == 'expense')
+    
+    # Get category-wise monthly expenses
+    category_expenses = db.session.query(
+        Transaction.category,
+        func.sum(Transaction.amount).label('total')
+    ).filter(
+        Transaction.user_id == current_user.id,
+        Transaction.type == 'expense',
+        extract('month', Transaction.date) == current_month,
+        extract('year', Transaction.date) == current_year
+    ).group_by(Transaction.category).all()
+    
+    # Get category-wise monthly income
+    category_income = db.session.query(
+        Transaction.category,
+        func.sum(Transaction.amount).label('total')
+    ).filter(
+        Transaction.user_id == current_user.id,
+        Transaction.type == 'income',
+        extract('month', Transaction.date) == current_month,
+        extract('year', Transaction.date) == current_year
+    ).group_by(Transaction.category).all()
+    
+    return render_template('dashboard.html',
+        daily_transactions=daily_transactions,
+        monthly_transactions=monthly_transactions,
+        daily_income=daily_income,
+        daily_expenses=daily_expenses,
+        monthly_income=monthly_income,
+        monthly_expenses=monthly_expenses,
+        monthly_balance=monthly_balance,
+        category_expenses=category_expenses,
+        category_income=category_income,
+        current_month=datetime(current_year, current_month, 1).strftime('%B %Y')
+    )
 
 @main.route('/add', methods=['POST'])
 @login_required

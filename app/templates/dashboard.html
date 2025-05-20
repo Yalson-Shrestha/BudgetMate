@@ -1,72 +1,218 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Dashboard</h2>
-
 <div class="row mb-4">
-    <div class="col-md-4">
+    <div class="col-12">
+        <h2>Dashboard - {{ current_month }}</h2>
+    </div>
+</div>
+
+<!-- Monthly Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
         <div class="card text-white bg-success mb-3">
             <div class="card-body">
-                <h5 class="card-title">Total Income</h5>
-                <p class="card-text">₹{{ income }}</p>
+                <h5 class="card-title">Monthly Income</h5>
+                <p class="card-text">₹{{ "%.2f"|format(monthly_income) }}</p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card text-white bg-danger mb-3">
             <div class="card-body">
-                <h5 class="card-title">Total Expenses</h5>
-                <p class="card-text">₹{{ expenses }}</p>
+                <h5 class="card-title">Monthly Expenses</h5>
+                <p class="card-text">₹{{ "%.2f"|format(monthly_expenses) }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Monthly Balance</h5>
+                <p class="card-text">₹{{ "%.2f"|format(monthly_balance) }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Today's Total</h5>
+                <p class="card-text">Income: ₹{{ "%.2f"|format(daily_income) }}<br>
+                Expenses: ₹{{ "%.2f"|format(daily_expenses) }}</p>
             </div>
         </div>
     </div>
 </div>
 
-<h4>Add Transaction</h4>
-<form method="POST" action="{{ url_for('main.add_transaction') }}">
-    <div class="row g-3 mb-3">
-        <div class="col-md-3">
-            <input type="number" step="0.01" name="amount" class="form-control" placeholder="Amount" required>
-        </div>
-        <div class="col-md-3">
-            <input type="text" name="category" class="form-control" placeholder="Category (e.g. Salary, Food)" required>
-        </div>
-        <div class="col-md-3">
-            <select name="type" class="form-control" required>
-                <option value="">Select Type</option>
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <input type="text" name="note" class="form-control" placeholder="Note (optional)">
+<!-- Charts -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Monthly Expenses by Category</h5>
+                <canvas id="expenseChart"></canvas>
+            </div>
         </div>
     </div>
-    <button type="submit" class="btn btn-primary">Add</button>
-</form>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Monthly Income by Category</h5>
+                <canvas id="incomeChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
 
-<hr>
+<!-- Add Transaction Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h4>Add Transaction</h4>
+        <form method="POST" action="{{ url_for('main.add_transaction') }}">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <input type="number" step="0.01" name="amount" class="form-control" placeholder="Amount" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="category" class="form-control" placeholder="Category (e.g. Salary, Food)" required>
+                </div>
+                <div class="col-md-2">
+                    <select name="type" class="form-control" required>
+                        <option value="">Select Type</option>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="note" class="form-control" placeholder="Note (optional)">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">Add</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
-<h4 class="mt-4">Transactions</h4>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Amount (₹)</th>
-            <th>Category</th>
-            <th>Type</th>
-            <th>Note</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for t in transactions %}
-        <tr>
-            <td>{{ t.date }}</td>
-            <td>{{ t.amount }}</td>
-            <td>{{ t.category }}</td>
-            <td>{{ t.type }}</td>
-            <td>{{ t.note }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<!-- Transaction Tabs -->
+<ul class="nav nav-tabs mb-3" id="transactionTabs" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="daily-tab" data-bs-toggle="tab" href="#daily" role="tab">Today's Transactions</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="monthly-tab" data-bs-toggle="tab" href="#monthly" role="tab">Monthly Transactions</a>
+    </li>
+</ul>
+
+<div class="tab-content" id="transactionTabsContent">
+    <!-- Daily Transactions -->
+    <div class="tab-pane fade show active" id="daily" role="tabpanel">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Amount (₹)</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in daily_transactions %}
+                    <tr>
+                        <td>{{ t.date.strftime('%H:%M') }}</td>
+                        <td>{{ "%.2f"|format(t.amount) }}</td>
+                        <td>{{ t.category }}</td>
+                        <td>{{ t.type }}</td>
+                        <td>{{ t.note }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Monthly Transactions -->
+    <div class="tab-pane fade" id="monthly" role="tabpanel">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount (₹)</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in monthly_transactions %}
+                    <tr>
+                        <td>{{ t.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ "%.2f"|format(t.amount) }}</td>
+                        <td>{{ t.category }}</td>
+                        <td>{{ t.type }}</td>
+                        <td>{{ t.note }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Prepare data for expense chart
+const expenseData = {
+    labels: [{% for category, total in category_expenses %}'{{ category }}',{% endfor %}],
+    datasets: [{
+        data: [{% for category, total in category_expenses %}{{ total }},{% endfor %}],
+        backgroundColor: [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+        ]
+    }]
+};
+
+// Prepare data for income chart
+const incomeData = {
+    labels: [{% for category, total in category_income %}'{{ category }}',{% endfor %}],
+    datasets: [{
+        data: [{% for category, total in category_income %}{{ total }},{% endfor %}],
+        backgroundColor: [
+            '#4BC0C0', '#FFCE56', '#36A2EB', '#FF6384', '#9966FF', '#FF9F40'
+        ]
+    }]
+};
+
+// Create expense chart
+new Chart(document.getElementById('expenseChart'), {
+    type: 'pie',
+    data: expenseData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Create income chart
+new Chart(document.getElementById('incomeChart'), {
+    type: 'pie',
+    data: incomeData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
 {% endblock %}
