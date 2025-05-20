@@ -1,17 +1,22 @@
 # BudgetMate
 
-A personal finance management application that helps you track your income and expenses, with monthly analysis and visualization.
+BudgetMate is a Flask-based web application for tracking monthly income and expenses, helping users manage their finances effectively.
 
 ## Features
 
 - User authentication (signup/login)
-- Track daily and monthly income and expenses
+- Track monthly income and expenses
 - Categorize transactions
-- Visualize spending patterns with charts
-- Monthly financial analysis
-- Responsive design
+- View financial analytics and insights
+- Responsive and user-friendly interface
 
-## Setup Instructions
+## Prerequisites
+
+- Python 3.8 or higher
+- pip (Python package installer)
+- Git (for cloning the repository)
+
+## Installation
 
 1. Clone the repository:
 ```bash
@@ -30,32 +35,27 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-3. Install the required packages:
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Initialize the database:
-```bash
-python init_db.py
+4. Set up environment variables:
+Create a `.env` file in the root directory with the following content:
+```
+FLASK_APP=run.py
+FLASK_ENV=development
+SECRET_KEY=your-secret-key-here
 ```
 
-5. Run the application:
+## Running the Application
+
+1. Make sure your virtual environment is activated
+2. Run the application:
 ```bash
 python run.py
 ```
-
-6. Open your web browser and go to:
-```
-http://localhost:5000
-```
-
-## First Time Setup
-
-When you first run the application:
-1. The database will be automatically created in the `instance` folder
-2. You'll need to create a new account using the signup page
-3. After signing up, you can log in and start tracking your finances
+3. Open your web browser and navigate to `http://localhost:5000`
 
 ## Project Structure
 
@@ -65,21 +65,33 @@ BudgetMate/
 │   ├── __init__.py
 │   ├── models.py
 │   ├── routes.py
+│   ├── static/
 │   └── templates/
-│       ├── base.html
-│       ├── dashboard.html
-│       ├── login.html
-│       └── signup.html
-├── instance/          # Created automatically (gitignored)
+├── instance/
+│   └── finance.db
+├── .env
+├── .gitignore
+├── README.md
 ├── requirements.txt
-├── init_db.py
 └── run.py
 ```
 
+## Database
+
+The application uses SQLite as its database, which is automatically created in the `instance` folder when you first run the application. No additional database setup is required.
+
 ## Contributing
 
-Feel free to submit issues and enhancement requests!
+1. Fork the repository
+2. Create a new branch for your feature
+3. Commit your changes
+4. Push to your branch
+5. Create a Pull Request
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+If you encounter any issues or have questions, please open an issue in the GitHub repository.
