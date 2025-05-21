@@ -79,7 +79,7 @@ def dashboard():
     # Get all transactions for the current day
     daily_transactions = Transaction.query.filter(
         Transaction.user_id == current_user.id,
-        Transaction.date == today
+        func.date(Transaction.date) == today
     ).order_by(Transaction.date.desc()).all()
     
     # Calculate monthly totals
@@ -131,15 +131,40 @@ def dashboard():
 @main.route('/add', methods=['POST'])
 @login_required
 def add_transaction():
-    t = Transaction(
-        amount=float(request.form['amount']),
-        category=request.form['category'],
-        type=request.form['type'],
-        note=request.form.get('note', ''),
-        user_id=current_user.id
-    )
-    db.session.add(t)
-    db.session.commit()
+    try:
+        # Validate amount
+        amount = request.form['amount']
+        if not amount or float(amount) <= 0:
+            flash('Please enter a valid amount greater than 0')
+            return redirect(url_for('main.dashboard'))
+
+        # Validate category
+        category = request.form['category']
+        if not category:
+            flash('Please select a category')
+            return redirect(url_for('main.dashboard'))
+
+        # Validate type
+        type = request.form['type']
+        if type not in ['income', 'expense']:
+            flash('Invalid transaction type')
+            return redirect(url_for('main.dashboard'))
+
+        t = Transaction(
+            amount=float(amount),
+            category=category,
+            type=type,
+            note=request.form.get('note', ''),
+            user_id=current_user.id
+        )
+        db.session.add(t)
+        db.session.commit()
+        flash('Transaction added successfully!')
+    except ValueError:
+        flash('Invalid amount format')
+    except Exception as e:
+        db.session.rollback()
+        flash('An error occurred while adding the transaction')
     return redirect(url_for('main.dashboard'))
 
 @main.route('/chart')
