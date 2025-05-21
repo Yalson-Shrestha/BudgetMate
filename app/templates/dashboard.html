@@ -1,53 +1,248 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
+<style>
+    .dashboard-container {
+        padding: 24px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .dashboard-header {
+        margin-bottom: 32px;
+    }
+
+    .dashboard-header h2 {
+        font-size: 24px;
+        font-weight: 500;
+        color: #0f0f0f;
+        margin: 0;
+    }
+
+    .summary-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        height: 100%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .summary-card .card-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #606060;
+        margin-bottom: 8px;
+    }
+
+    .summary-card .card-value {
+        font-size: 24px;
+        font-weight: 500;
+        color: #0f0f0f;
+        margin: 0;
+    }
+
+    .summary-card.income { border-left: 4px solid #34a853; }
+    .summary-card.expenses { border-left: 4px solid #ea4335; }
+    .summary-card.balance { border-left: 4px solid #4285f4; }
+    .summary-card.daily { border-left: 4px solid #fbbc05; }
+
+    .transaction-form {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 32px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .transaction-form h4 {
+        font-size: 18px;
+        font-weight: 500;
+        color: #0f0f0f;
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        padding: 10px 16px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+        border-color: #4285f4;
+        box-shadow: none;
+    }
+
+    .btn-primary {
+        background-color: #4285f4;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 24px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover {
+        background-color: #3367d6;
+    }
+
+    .nav-tabs {
+        border: none;
+        margin-bottom: 24px;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        color: #606060;
+        font-weight: 500;
+        padding: 12px 24px;
+        border-radius: 8px;
+        margin-right: 8px;
+    }
+
+    .nav-tabs .nav-link:hover {
+        background-color: #f1f1f1;
+    }
+
+    .nav-tabs .nav-link.active {
+        background-color: #4285f4;
+        color: white;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .table {
+        margin: 0;
+    }
+
+    .table thead th {
+        border-top: none;
+        border-bottom: 2px solid #e0e0e0;
+        color: #606060;
+        font-weight: 500;
+        font-size: 14px;
+        padding: 12px 16px;
+    }
+
+    .table tbody td {
+        padding: 12px 16px;
+        font-size: 14px;
+        color: #0f0f0f;
+        vertical-align: middle;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .transaction-type {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .transaction-type.income {
+        background-color: #e6f4ea;
+        color: #34a853;
+    }
+
+    .transaction-type.expense {
+        background-color: #fce8e6;
+        color: #ea4335;
+    }
+
+    .analysis-button {
+        display: inline-flex;
+        align-items: center;
+        background-color: #4285f4;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        margin-top: 24px;
+        transition: background-color 0.2s;
+    }
+
+    .analysis-button:hover {
+        background-color: #3367d6;
+        color: white;
+    }
+
+    .analysis-button i {
+        margin-right: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 16px;
+        }
+        
+        .summary-card {
+            margin-bottom: 16px;
+        }
+        
+        .transaction-form .row > div {
+            margin-bottom: 16px;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
         <h2>Dashboard - {{ current_month }}</h2>
+        <p class="text-muted" style="margin-top: 8px; font-size: 14px;">
+            <i class="fas fa-clock me-1"></i>Last updated: {{ now.strftime('%Y-%m-%d %H:%M:%S') }}
+        </p>
     </div>
-</div>
 
-<!-- Monthly Summary Cards -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Monthly Income</h5>
-                <p class="card-text">₹{{ "%.2f"|format(monthly_income) }}</p>
+    <!-- Monthly Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="summary-card income">
+                <h5 class="card-title">{{ current_month }} Income</h5>
+                <p class="card-value">₹{{ "%.2f"|format(monthly_income) }}</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card expenses">
+                <h5 class="card-title">{{ current_month }} Expenses</h5>
+                <p class="card-value">₹{{ "%.2f"|format(monthly_expenses) }}</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card balance">
+                <h5 class="card-title">{{ current_month }} Balance</h5>
+                <p class="card-value">₹{{ "%.2f"|format(monthly_balance) }}</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card daily">
+                <h5 class="card-title">Today's Summary ({{ today.strftime('%Y-%m-%d') }})</h5>
+                <p class="card-value">
+                    Income: ₹{{ "%.2f"|format(daily_income) }}<br>
+                    Expenses: ₹{{ "%.2f"|format(daily_expenses) }}
+                </p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-danger mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Monthly Expenses</h5>
-                <p class="card-text">₹{{ "%.2f"|format(monthly_expenses) }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-info mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Monthly Balance</h5>
-                <p class="card-text">₹{{ "%.2f"|format(monthly_balance) }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-warning mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Today's Total</h5>
-                <p class="card-text">Income: ₹{{ "%.2f"|format(daily_income) }}<br>
-                Expenses: ₹{{ "%.2f"|format(daily_expenses) }}</p>
-            </div>
-        </div>
-    </div>
-</div>
 
-
-
-<!-- Add Transaction Form -->
-<div class="card mb-4">
-    <div class="card-body">
+    <!-- Add Transaction Form -->
+    <div class="transaction-form">
         <h4>Add Transaction</h4>
         <form method="POST" action="{{ url_for('main.add_transaction') }}">
             <div class="row g-3">
@@ -68,86 +263,111 @@
                     <input type="text" name="note" class="form-control" placeholder="Note (optional)">
                 </div>
                 <div class="col-md-1">
-                    <button type="submit" class="btn btn-primary w-100">Add</button>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-plus"></i>
+                    </button>
                 </div>
             </div>
         </form>
     </div>
-</div>
 
-<!-- Transaction Tabs -->
-<ul class="nav nav-tabs mb-3" id="transactionTabs" role="tablist">
-    <li class="nav-item">
-        <a class="nav-link active" id="daily-tab" data-bs-toggle="tab" href="#daily" role="tab">Today's Transactions</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" id="monthly-tab" data-bs-toggle="tab" href="#monthly" role="tab">Monthly Transactions</a>
-    </li>
-</ul>
+    <!-- Transaction Tabs -->
+    <ul class="nav nav-tabs" id="transactionTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="daily-tab" data-bs-toggle="tab" href="#daily" role="tab">
+                <i class="fas fa-calendar-day me-2"></i>Today's Transactions ({{ today.strftime('%Y-%m-%d') }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="monthly-tab" data-bs-toggle="tab" href="#monthly" role="tab">
+                <i class="fas fa-calendar-alt me-2"></i>{{ current_month }} Transactions
+            </a>
+        </li>
+    </ul>
 
-<div class="tab-content" id="transactionTabsContent">
-    <!-- Daily Transactions -->
-    <div class="tab-pane fade show active" id="daily" role="tabpanel">
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Amount (₹)</th>
-                        <th>Category</th>
-                        <th>Type</th>
-                        <th>Note</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for t in daily_transactions %}
-                    <tr>
-                        <td>{{ t.date.strftime('%H:%M') }}</td>
-                        <td>{{ "%.2f"|format(t.amount) }}</td>
-                        <td>{{ t.category }}</td>
-                        <td>{{ t.type }}</td>
-                        <td>{{ t.note }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="tab-content" id="transactionTabsContent">
+        <!-- Daily Transactions -->
+        <div class="tab-pane fade show active" id="daily" role="tabpanel">
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Amount</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in daily_transactions %}
+                            <tr>
+                                <td>{{ t.date.strftime('%H:%M') }}</td>
+                                <td>₹{{ "%.2f"|format(t.amount) }}</td>
+                                <td>{{ t.category }}</td>
+                                <td>
+                                    <span class="transaction-type {{ t.type }}">
+                                        {{ t.type|title }}
+                                    </span>
+                                </td>
+                                <td>{{ t.note }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Monthly Transactions -->
+        <div class="tab-pane fade" id="monthly" role="tabpanel">
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in monthly_transactions %}
+                            <tr>
+                                <td>{{ t.date.strftime('%Y-%m-%d') }}</td>
+                                <td>₹{{ "%.2f"|format(t.amount) }}</td>
+                                <td>{{ t.category }}</td>
+                                <td>
+                                    <span class="transaction-type {{ t.type }}">
+                                        {{ t.type|title }}
+                                    </span>
+                                </td>
+                                <td>{{ t.note }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <!-- Monthly Transactions -->
-    <div class="tab-pane fade" id="monthly" role="tabpanel">
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Amount (₹)</th>
-                        <th>Category</th>
-                        <th>Type</th>
-                        <th>Note</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for t in monthly_transactions %}
-                    <tr>
-                        <td>{{ t.date.strftime('%Y-%m-%d') }}</td>
-                        <td>{{ "%.2f"|format(t.amount) }}</td>
-                        <td>{{ t.category }}</td>
-                        <td>{{ t.type }}</td>
-                        <td>{{ t.note }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+
+    <a href="{{ url_for('main.chart') }}" class="analysis-button">
+        <i class="fas fa-chart-line"></i>
+        Budget Analysis
+    </a>
 </div>
 
+<script>
+    // Add auto-refresh functionality
+    function refreshPage() {
+        location.reload();
+    }
 
-<a href="{{ url_for('main.chart') }}">
-    <button>View Analysis</button>
-</a>
-
-
-
+    // Refresh the page every minute to update the daily transactions
+    setInterval(refreshPage, 60000);
+</script>
 {% endblock %}

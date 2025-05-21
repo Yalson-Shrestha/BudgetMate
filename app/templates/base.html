@@ -2,37 +2,293 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BudgetMate</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --sidebar-bg: #0f0f0f;
+            --sidebar-hover: #272727;
+            --text-color: #ffffff;
+            --text-secondary: #aaaaaa;
+            --navbar-height: 56px;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            padding-top: var(--navbar-height);
+        }
+
+        /* Navbar styles */
+        .navbar {
+            background-color: var(--sidebar-bg) !important;
+            padding: 0 16px;
+            height: var(--navbar-height);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .btn-outline-light {
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 14px;
+        }
+
+        .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            height: calc(100vh - var(--navbar-height));
+            width: 0;
+            position: fixed;
+            z-index: 1000;
+            top: var(--navbar-height);
+            left: 0;
+            background-color: var(--sidebar-bg);
+            overflow-x: hidden;
+            transition: 0.3s ease;
+            padding-top: 12px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 0 24px 12px 24px;
+            border-bottom: 1px solid #272727;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-section {
+            padding: 8px 0;
+            border-bottom: 1px solid #272727;
+        }
+
+        .sidebar-section-title {
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 500;
+            padding: 8px 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar a {
+            padding: 8px 24px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+            height: 40px;
+            border-radius: 10px;
+            margin: 0 12px;
+        }
+
+        .sidebar a:hover {
+            background-color: var(--sidebar-hover);
+        }
+
+        .sidebar a i {
+            width: 24px;
+            font-size: 18px;
+            margin-right: 24px;
+            color: var(--text-color);
+        }
+
+        .sidebar .closebtn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 24px;
+            color: var(--text-color);
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar .closebtn:hover {
+            background-color: var(--sidebar-hover);
+        }
+
+        .openbtn {
+            font-size: 20px;
+            cursor: pointer;
+            background-color: transparent;
+            color: var(--text-color);
+            padding: 8px;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+
+        .openbtn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #main {
+            transition: margin-left 0.3s ease;
+            min-height: calc(100vh - var(--navbar-height));
+        }
+
+        /* When the sidebar is open */
+        .sidebar.open {
+            width: 240px;
+        }
+
+        /* Add margin to main content when sidebar is open */
+        #main.shifted {
+            margin-left: 240px;
+        }
+
+        /* Responsive adjustments */
+        @media screen and (max-width: 768px) {
+            #main.shifted {
+                margin-left: 0;
+            }
+            .sidebar.open {
+                width: 240px;
+            }
+            .sidebar a {
+                margin: 0 8px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">BudgetMate</a>
-            <div class="d-flex">
-                {% if current_user.is_authenticated %}
-                    <a class="btn btn-outline-light me-2" href="{{ url_for('main.logout') }}">Logout</a>
-                {% else %}
-                    <a class="btn btn-outline-light me-2" href="{{ url_for('main.login') }}">Login</a>
-                    <a class="btn btn-outline-light" href="{{ url_for('main.signup') }}">Signup</a>
-                {% endif %}
-            </div>
+    <!-- Sidebar -->
+    <div id="mySidebar" class="sidebar">
+        <div class="sidebar-header">
+            <button class="closebtn" onclick="closeNav()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-    </nav>
-
-    <div class="container">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-info">{{ message }}</div>
-                {% endfor %}
+        
+        <div class="sidebar-section">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.index') }}">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
             {% endif %}
-        {% endwith %}
+            <a href="{{ url_for('main.chart') }}">
+                <i class="fas fa-chart-line"></i>
+                <span>Budget Analysis</span>
+            </a>
+            <a href="{{ url_for('main.help') }}">
+                <i class="fas fa-question-circle"></i>
+                <span>Help</span>
+            </a>
+            <a href="{{ url_for('main.feedback') }}">
+                <i class="fas fa-comment-alt"></i>
+                <span>Feedback</span>
+            </a>
+        </div>
 
-        {% block content %}{% endblock %}
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Account</div>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.logout') }}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            {% else %}
+                <a href="{{ url_for('main.login') }}">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </a>
+                <a href="{{ url_for('main.signup') }}">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Signup</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div id="main">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <button class="openbtn" onclick="toggleNav()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">BudgetMate</a>
+                <div class="d-flex align-items-center">
+                    {% if not current_user.is_authenticated %}
+                        <a class="btn btn-outline-light me-2" href="{{ url_for('main.login') }}">Login</a>
+                        <a class="btn btn-outline-light" href="{{ url_for('main.signup') }}">Signup</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-info">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
     </div>
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleNav() {
+            const sidebar = document.getElementById("mySidebar");
+            const main = document.getElementById("main");
+            sidebar.classList.toggle("open");
+            main.classList.toggle("shifted");
+        }
+
+        function closeNav() {
+            const sidebar = document.getElementById("mySidebar");
+            const main = document.getElementById("main");
+            sidebar.classList.remove("open");
+            main.classList.remove("shifted");
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById("mySidebar");
+            const openbtn = document.querySelector('.openbtn');
+            const main = document.getElementById("main");
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !openbtn.contains(event.target) && 
+                sidebar.classList.contains("open")) {
+                sidebar.classList.remove("open");
+                main.classList.remove("shifted");
+            }
+        });
+    </script>
 </body>
 </html>

@@ -4,11 +4,14 @@ from .models import db, User, Transaction
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, datetime
 from sqlalchemy import extract, func
+from urllib.parse import quote
 
 main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
     return render_template('index.html')
 
 @main.route('/signup', methods=['GET', 'POST'])
@@ -54,7 +57,8 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('main.index'))
+    flash('You have been logged out successfully.')
+    return redirect(url_for('main.login'))
 
 @main.route('/dashboard')
 @login_required
@@ -62,6 +66,8 @@ def dashboard():
     # Get current month's transactions
     current_month = date.today().month
     current_year = date.today().year
+    today = date.today()
+    now = datetime.now()
     
     # Get all transactions for the current month
     monthly_transactions = Transaction.query.filter(
@@ -71,7 +77,6 @@ def dashboard():
     ).order_by(Transaction.date.desc()).all()
     
     # Get all transactions for the current day
-    today = date.today()
     daily_transactions = Transaction.query.filter(
         Transaction.user_id == current_user.id,
         Transaction.date == today
@@ -118,69 +123,72 @@ def dashboard():
         monthly_balance=monthly_balance,
         category_expenses=category_expenses,
         category_income=category_income,
-        current_month=datetime(current_year, current_month, 1).strftime('%B %Y')
+        current_month=datetime(current_year, current_month, 1).strftime('%B %Y'),
+        today=today,
+        now=now
     )
+
+@main.route('/add', methods=['POST'])
+@login_required
+def add_transaction():
+    t = Transaction(
+        amount=float(request.form['amount']),
+        category=request.form['category'],
+        type=request.form['type'],
+        note=request.form.get('note', ''),
+        user_id=current_user.id
+    )
+    db.session.add(t)
+    db.session.commit()
+    return redirect(url_for('main.dashboard'))
 
 @main.route('/chart')
 @login_required
 def chart():
-    now = datetime.now()
-    current_month_start = date(now.year, now.month, 1)
-
-    # Get all current user's transactions for this month
-    transactions = Transaction.query.filter(
+    # Get current month's transactions
+    current_month = date.today().month
+    current_year = date.today().year
+    
+    # Get category-wise monthly expenses
+    category_expenses = db.session.query(
+        Transaction.category,
+        func.sum(Transaction.amount).label('total')
+    ).filter(
         Transaction.user_id == current_user.id,
-        Transaction.date >= current_month_start
-    ).all()
-
-    # Separate income and expense
-    category_expenses = {}
-    category_income = {}
-
-    for t in transactions:
-        if t.type == 'expense':
-            category_expenses[t.category] = category_expenses.get(t.category, 0) + t.amount
-        elif t.type == 'income':
-            category_income[t.category] = category_income.get(t.category, 0) + t.amount
-
-    # Convert to list of tuples for easier use in chart
-    category_expenses_list = list(category_expenses.items())
-    category_income_list = list(category_income.items())
-
-    return render_template(
-        'chart.html',
-        category_expenses=category_expenses_list,
-        category_income=category_income_list
+        Transaction.type == 'expense',
+        extract('month', Transaction.date) == current_month,
+        extract('year', Transaction.date) == current_year
+    ).group_by(Transaction.category).all()
+    
+    # Convert expense data to list of lists for JSON serialization
+    expense_data = [[row[0], float(row[1])] for row in category_expenses]
+    
+    # Get category-wise monthly income
+    category_income = db.session.query(
+        Transaction.category,
+        func.sum(Transaction.amount).label('total')
+    ).filter(
+        Transaction.user_id == current_user.id,
+        Transaction.type == 'income',
+        extract('month', Transaction.date) == current_month,
+        extract('year', Transaction.date) == current_year
+    ).group_by(Transaction.category).all()
+    
+    # Convert income data to list of lists for JSON serialization
+    income_data = [[row[0], float(row[1])] for row in category_income]
+    
+    return render_template('chart.html',
+        category_expenses=expense_data,
+        category_income=income_data,
+        current_month=datetime(current_year, current_month, 1).strftime('%B %Y')
     )
 
-
-@main.route('/add_transaction', methods=['POST'])
+@main.route('/help')
 @login_required
-def add_transaction():
-    amount = request.form.get('amount')
-    category = request.form.get('category')
-    type_ = request.form.get('type')  # 'income' or 'expense'
-    note = request.form.get('note')
+def help():
+    return render_template('help.html')
 
-    if not amount or not category or not type_:
-        flash('Please fill in all required fields.', 'danger')
-        return redirect(url_for('main.dashboard'))
-
-    try:
-        amount = float(amount)
-    except ValueError:
-        flash('Invalid amount entered.', 'danger')
-        return redirect(url_for('main.dashboard'))
-
-    transaction = Transaction(
-        amount=amount,
-        category=category,
-        type=type_,
-        note=note,
-        user_id=current_user.id
-    )
-
-    db.session.add(transaction)
-    db.session.commit()
-    flash('Transaction added successfully!', 'success')
-    return redirect(url_for('main.dashboard'))
+@main.route('/feedback')
+@login_required
+def feedback():
+    return render_template('feedback.html')

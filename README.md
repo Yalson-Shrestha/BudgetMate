@@ -40,13 +40,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Set up environment variables:
-Create a `.env` file in the root directory with the following content:
-```
-FLASK_APP=run.py
-FLASK_ENV=development
-SECRET_KEY=your-secret-key-here
-```
 
 ## Running the Application
 

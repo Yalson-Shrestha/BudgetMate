@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .help-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+
+    .help-header {
+        margin-bottom: 32px;
+        text-align: center;
+    }
+
+    .help-header h1 {
+        font-size: 32px;
+        font-weight: 500;
+        color: #0f0f0f;
+        margin-bottom: 16px;
+    }
+
+    .help-header p {
+        color: #606060;
+        font-size: 16px;
+    }
+
+    .help-section {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .help-section h2 {
+        font-size: 20px;
+        font-weight: 500;
+        color: #0f0f0f;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+    }
+
+    .help-section h2 i {
+        margin-right: 12px;
+        color: #4285f4;
+    }
+
+    .help-section p {
+        color: #606060;
+        line-height: 1.6;
+        margin-bottom: 16px;
+    }
+
+    .help-section ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .help-section li {
+        margin-bottom: 12px;
+        padding-left: 24px;
+        position: relative;
+        color: #606060;
+    }
+
+    .help-section li:before {
+        content: "•";
+        color: #4285f4;
+        position: absolute;
+        left: 8px;
+    }
+
+    .contact-info {
+        background: #e8f0fe;
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 16px;
+    }
+
+    .contact-info p {
+        margin: 0;
+        color: #1a73e8;
+    }
+
+    .contact-box {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 16px;
+        text-align: center;
+    }
+
+    .contact-box i {
+        font-size: 24px;
+        color: #4285f4;
+        margin-bottom: 12px;
+    }
+
+    .contact-box p {
+        color: #606060;
+        margin-bottom: 8px;
+    }
+
+    .contact-email {
+        color: #4285f4;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 16px;
+    }
+
+    .contact-email:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="help-container">
+    <div class="help-header">
+        <h1>Help Center</h1>
+        <p>Find answers to common questions about using BudgetMate</p>
+    </div>
+
+    <div class="help-section">
+        <h2><i class="fas fa-wallet"></i>Getting Started</h2>
+        <p>Welcome to BudgetMate! Here's how to get started with managing your finances:</p>
+        <ul>
+            <li>Sign up for a new account or log in to your existing account</li>
+            <li>Add your first transaction using the "Add Transaction" form on the dashboard</li>
+            <li>View your daily and monthly summaries in the dashboard</li>
+            <li>Check your spending patterns in the Budget Analysis section</li>
+        </ul>
+    </div>
+
+    <div class="help-section">
+        <h2><i class="fas fa-plus-circle"></i>Adding Transactions</h2>
+        <p>To add a new transaction:</p>
+        <ul>
+            <li>Go to the dashboard</li>
+            <li>Fill in the transaction form with the amount, category, and type (income/expense)</li>
+            <li>Add an optional note for additional details</li>
+            <li>Click the plus button to save the transaction</li>
+        </ul>
+    </div>
+
+    <div class="help-section">
+        <h2><i class="fas fa-chart-pie"></i> Understanding Your Budget</h2>
+        <div class="help-content">
+            <p>Your budget is automatically calculated based on your income and expenses:</p>
+            <ul>
+                <li><strong>Monthly Income:</strong> Total of all income transactions in the current month</li>
+                <li><strong>Monthly Expenses:</strong> Total of all expense transactions in the current month</li>
+                <li><strong>Balance:</strong> The difference between your income and expenses</li>
+                <li><strong>Daily Summary:</strong> Shows your income and expenses for the current day</li>
+            </ul>
+            <p>Use the Budget Analysis page to view detailed charts and breakdowns of your spending patterns.</p>
+        </div>
+    </div>
+
+    <div class="help-section">
+        <h2><i class="fas fa-question-circle"></i> Still Don't Get It?</h2>
+        <div class="help-content">
+            <p>Go fuck yourself retarded ahh brain</p>
+            <div class="contact-box">
+                <i class="fas fa-envelope"></i>
+                <p>Send your questions or issues to:</p>
+                <a href="mailto:yalsonshrestha100@gmail.com" class="contact-email">yalsonshrestha100@gmail.com</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
