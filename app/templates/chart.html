@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-    <h2>Spending & Income Analysis ({{ current_user.username }})</h2>
 
-    <!-- Expense Chart -->
-    <div class="row my-5">
-        <div class="col-md-6">
+    <!-- Optional: Page Title or Remove if Not Needed -->
+    <h2 class="text-center mb-5">Spending & Income Analysis</h2>
+
+    <div class="row">
+        <!-- Expense Column -->
+        <div class="col-md-6 mb-5">
+            <h4 class="text-center">Expense Chart</h4>
             <canvas id="expenseChart"></canvas>
-        </div>
-        <div class="col-md-6">
-            <h5>Expense Breakdown</h5>
+            <h5 class="mt-4">Expense Breakdown</h5>
             <table class="table table-striped" id="expenseTable">
                 <thead>
                     <tr>
@@ -21,15 +22,12 @@
                 <tbody></tbody>
             </table>
         </div>
-    </div>
 
-    <!-- Income Chart -->
-    <div class="row my-5">
-        <div class="col-md-6">
+        <!-- Income Column -->
+        <div class="col-md-6 mb-5">
+            <h4 class="text-center">Income Chart</h4>
             <canvas id="incomeChart"></canvas>
-        </div>
-        <div class="col-md-6">
-            <h5>Income Breakdown</h5>
+            <h5 class="mt-4">Income Breakdown</h5>
             <table class="table table-striped" id="incomeTable">
                 <thead>
                     <tr>
@@ -77,7 +75,9 @@
                 datasets: [{
                     data: values,
                     backgroundColor: [
-                        '#f87171', '#60a5fa', '#34d399', '#fbbf24', '#c084fc', '#f472b6', '#38bdf8', '#a3e635'
+                        '#f87171', '#60a5fa', '#34d399', '#fbbf24',
+                        '#c084fc', '#f472b6', '#38bdf8', '#a3e635',
+                        '#fdba74', '#4ade80'
                     ],
                 }]
             },
