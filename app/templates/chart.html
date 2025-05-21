@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Spending & Income Analysis ({{ current_user.username }})</h2>
+
+    <!-- Expense Chart -->
+    <div class="row my-5">
+        <div class="col-md-6">
+            <canvas id="expenseChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h5>Expense Breakdown</h5>
+            <table class="table table-striped" id="expenseTable">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Amount (₹)</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Income Chart -->
+    <div class="row my-5">
+        <div class="col-md-6">
+            <canvas id="incomeChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h5>Income Breakdown</h5>
+            <table class="table table-striped" id="incomeTable">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Amount (₹)</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const expenseData = {{ category_expenses|tojson }};
+    const incomeData = {{ category_income|tojson }};
+
+    function createChart(ctxId, data, type, tableId) {
+        const ctx = document.getElementById(ctxId).getContext('2d');
+        const labels = data.map(item => item[0]);
+        const values = data.map(item => item[1]);
+        const total = values.reduce((a, b) => a + b, 0);
+        const percentages = values.map(v => ((v / total) * 100).toFixed(2));
+
+        // Fill table
+        const tableBody = document.querySelector(`#${tableId} tbody`);
+        tableBody.innerHTML = "";
+        data.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item[0]}</td>
+                <td>₹${item[1].toFixed(2)}</td>
+                <td>${percentages[index]}%</td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: [
+                        '#f87171', '#60a5fa', '#34d399', '#fbbf24', '#c084fc', '#f472b6', '#38bdf8', '#a3e635'
+                    ],
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const percent = ((value / total) * 100).toFixed(2);
+                                return `${label}: ₹${value.toFixed(2)} (${percent}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    createChart("expenseChart", expenseData, "expense", "expenseTable");
+    createChart("incomeChart", incomeData, "income", "incomeTable");
+</script>
+{% endblock %}

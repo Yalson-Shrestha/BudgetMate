@@ -121,16 +121,66 @@ def dashboard():
         current_month=datetime(current_year, current_month, 1).strftime('%B %Y')
     )
 
-@main.route('/add', methods=['POST'])
+@main.route('/chart')
+@login_required
+def chart():
+    now = datetime.now()
+    current_month_start = date(now.year, now.month, 1)
+
+    # Get all current user's transactions for this month
+    transactions = Transaction.query.filter(
+        Transaction.user_id == current_user.id,
+        Transaction.date >= current_month_start
+    ).all()
+
+    # Separate income and expense
+    category_expenses = {}
+    category_income = {}
+
+    for t in transactions:
+        if t.type == 'expense':
+            category_expenses[t.category] = category_expenses.get(t.category, 0) + t.amount
+        elif t.type == 'income':
+            category_income[t.category] = category_income.get(t.category, 0) + t.amount
+
+    # Convert to list of tuples for easier use in chart
+    category_expenses_list = list(category_expenses.items())
+    category_income_list = list(category_income.items())
+
+    return render_template(
+        'chart.html',
+        category_expenses=category_expenses_list,
+        category_income=category_income_list
+    )
+
+
+@main.route('/add_transaction', methods=['POST'])
 @login_required
 def add_transaction():
-    t = Transaction(
-        amount=float(request.form['amount']),
-        category=request.form['category'],
-        type=request.form['type'],
-        note=request.form.get('note', ''),
+    amount = request.form.get('amount')
+    category = request.form.get('category')
+    type_ = request.form.get('type')  # 'income' or 'expense'
+    note = request.form.get('note')
+
+    if not amount or not category or not type_:
+        flash('Please fill in all required fields.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    try:
+        amount = float(amount)
+    except ValueError:
+        flash('Invalid amount entered.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    transaction = Transaction(
+        amount=amount,
+        category=category,
+        type=type_,
+        note=note,
         user_id=current_user.id
     )
-    db.session.add(t)
+
+    db.session.add(transaction)
     db.session.commit()
+    flash('Transaction added successfully!', 'success')
     return redirect(url_for('main.dashboard'))
