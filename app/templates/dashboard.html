@@ -215,27 +215,27 @@
         <div class="col-md-3">
             <div class="summary-card income">
                 <h5 class="card-title">{{ current_month }} Income</h5>
-                <p class="card-value">₹{{ "%.2f"|format(monthly_income) }}</p>
+                <p class="card-value">₨ {{ "%.2f"|format(monthly_income) }}</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="summary-card expenses">
                 <h5 class="card-title">{{ current_month }} Expenses</h5>
-                <p class="card-value">₹{{ "%.2f"|format(monthly_expenses) }}</p>
+                <p class="card-value">₨ {{ "%.2f"|format(monthly_expenses) }}</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="summary-card balance">
                 <h5 class="card-title">{{ current_month }} Balance</h5>
-                <p class="card-value">₹{{ "%.2f"|format(monthly_balance) }}</p>
+                <p class="card-value">₨ {{ "%.2f"|format(monthly_balance) }}</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="summary-card daily">
                 <h5 class="card-title">Today's Summary ({{ today.strftime('%Y-%m-%d') }})</h5>
                 <p class="card-value">
-                    Income: ₹{{ "%.2f"|format(daily_income) }}<br>
-                    Expenses: ₹{{ "%.2f"|format(daily_expenses) }}
+                    Income: ₨ {{ "%.2f"|format(daily_income) }}<br>
+                    Expenses: ₨ {{ "%.2f"|format(daily_expenses) }}
                 </p>
             </div>
         </div>
@@ -304,7 +304,7 @@
                             {% for t in daily_transactions %}
                             <tr>
                                 <td>{{ t.date.strftime('%H:%M') }}</td>
-                                <td>₹{{ "%.2f"|format(t.amount) }}</td>
+                                <td>₨ {{ "%.2f"|format(t.amount) }}</td>
                                 <td>{{ t.category }}</td>
                                 <td>
                                     <span class="transaction-type {{ t.type }}">
@@ -338,7 +338,7 @@
                             {% for t in monthly_transactions %}
                             <tr>
                                 <td>{{ t.date.strftime('%Y-%m-%d') }}</td>
-                                <td>₹{{ "%.2f"|format(t.amount) }}</td>
+                                <td>₨ {{ "%.2f"|format(t.amount) }}</td>
                                 <td>{{ t.category }}</td>
                                 <td>
                                     <span class="transaction-type {{ t.type }}">

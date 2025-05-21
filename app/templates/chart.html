@@ -15,7 +15,7 @@
                 <thead>
                     <tr>
                         <th>Category</th>
-                        <th>Amount (₹)</th>
+                        <th>Amount (₨ )</th>
                         <th>Percentage</th>
                     </tr>
                 </thead>
@@ -32,7 +32,7 @@
                 <thead>
                     <tr>
                         <th>Category</th>
-                        <th>Amount (₹)</th>
+                        <th>Amount (₨ )</th>
                         <th>Percentage</th>
                     </tr>
                 </thead>
@@ -62,7 +62,7 @@
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${item[0]}</td>
-                <td>₹${item[1].toFixed(2)}</td>
+                <td>₨ ${item[1].toFixed(2)}</td>
                 <td>${percentages[index]}%</td>
             `;
             tableBody.appendChild(row);
@@ -91,7 +91,7 @@
                                 const label = context.label || '';
                                 const value = context.parsed;
                                 const percent = ((value / total) * 100).toFixed(2);
-                                return `${label}: ₹${value.toFixed(2)} (${percent}%)`;
+                                return `${label}: ₨ ${value.toFixed(2)} (${percent}%)`;
                             }
                         }
                     }
