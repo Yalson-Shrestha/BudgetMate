@@ -1,11 +1,15 @@
 from flask import Flask
-from .models import db
+from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_migrate import Migrate
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'your-secret-key'
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
     
     # Ensure the instance folder exists
     instance_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'instance')
@@ -16,10 +20,14 @@ def create_app():
     
     # Set the database path
     db_path = os.path.join(instance_path, 'finance.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    if os.getenv('DATABASE_URL'):
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL').replace('postgres://', 'postgresql://')
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    db.init_app(app)
+    db = SQLAlchemy(app)
+    migrate = Migrate(app, db)
 
     from .routes import main
     app.register_blueprint(main)
