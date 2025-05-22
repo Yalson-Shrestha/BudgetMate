@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#4285f4">
     <meta name="description" content="BudgetMate - Your personal finance companion for tracking expenses and managing budgets">
     
@@ -20,9 +20,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Base styles */
         :root {
             --primary-color: #4285f4;
+            --primary-dark: #3367d6;
             --text-color: #0f0f0f;
             --text-secondary: #606060;
             --border-color: #e0e0e0;
@@ -30,6 +30,11 @@
             --sidebar-width: 250px;
             --navbar-height: 60px;
             --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -41,9 +46,10 @@
             color: var(--text-color);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
         }
 
-        /* Navbar styles */
+        /* Navbar */
         .navbar {
             height: var(--navbar-height);
             background: white;
@@ -72,6 +78,7 @@
             color: var(--text-color);
             text-decoration: none;
             margin-right: 24px;
+            padding: 0;
         }
 
         .navbar-brand img {
@@ -86,7 +93,7 @@
             text-overflow: ellipsis;
         }
 
-        /* Sidebar styles */
+        /* Sidebar */
         .sidebar {
             position: fixed;
             top: var(--navbar-height);
@@ -96,10 +103,14 @@
             background: white;
             box-shadow: 1px 0 3px rgba(0,0,0,0.1);
             z-index: 900;
-            transform: translateX(0);
+            transform: translateX(-100%);
             transition: transform var(--transition-speed) ease;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
         }
 
         .sidebar-overlay {
@@ -115,7 +126,8 @@
             transition: opacity var(--transition-speed) ease;
         }
 
-        .sidebar-overlay.active {
+        .sidebar-overlay.show {
+            display: block;
             opacity: 1;
         }
 
@@ -138,6 +150,7 @@
             transition: all 0.2s ease;
             font-weight: 500;
             gap: 12px;
+            cursor: pointer;
         }
 
         .sidebar-menu a:hover,
@@ -154,7 +167,7 @@
 
         /* Main content */
         .main-content {
-            margin-left: var(--sidebar-width);
+            margin-left: 0;
             margin-top: var(--navbar-height);
             padding: 24px;
             min-height: calc(100vh - var(--navbar-height));
@@ -172,86 +185,47 @@
             color: var(--text-color);
             font-size: 1.5rem;
             line-height: 1;
-            -webkit-tap-highlight-color: transparent;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Mobile styles */
-        @media (max-width: 768px) {
-            :root {
-                --sidebar-width: 280px;
-            }
-
-            .openbtn {
-                display: block;
-            }
-
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .sidebar-overlay {
-                display: block;
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 16px;
-            }
-
-            .navbar-brand span {
-                max-width: 150px;
-            }
-
-            .navbar-brand img {
-                height: 28px;
-            }
-
-            /* Improve touch targets */
-            .sidebar-menu a {
-                padding: 16px 24px;
-                min-height: 48px;
-            }
-
-            .openbtn {
-                min-width: 48px;
-                min-height: 48px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            /* Prevent text selection on buttons */
-            .openbtn,
-            .sidebar-menu a,
-            .navbar-brand {
-                -webkit-touch-callout: none;
-                -webkit-user-select: none;
-                user-select: none;
-            }
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            gap: 8px;
+            min-height: 40px;
+            font-size: 1rem;
         }
 
-        /* Small mobile devices */
-        @media (max-width: 576px) {
-            .navbar-brand span {
-                max-width: 120px;
-            }
-
-            .navbar-brand img {
-                height: 24px;
-            }
-
-            .main-content {
-                padding: 12px;
-            }
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
         }
 
-        /* Prevent body scroll when sidebar is open */
-        body.sidebar-open {
-            overflow: hidden;
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--background-light);
         }
 
         /* Flash messages */
@@ -287,94 +261,197 @@
             }
         }
 
-        @media (max-width: 576px) {
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            :root {
+                --sidebar-width: 280px;
+            }
+
+            .openbtn {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .navbar-brand span {
+                max-width: 150px;
+            }
+
+            .navbar-brand img {
+                height: 28px;
+            }
+
+            .sidebar-menu a {
+                padding: 16px 24px;
+                min-height: 48px;
+            }
+
             .flash-messages {
                 left: 16px;
                 right: 16px;
                 width: auto;
             }
+
+            .btn {
+                min-height: 48px;
+                padding: 12px 20px;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Desktop styles */
+        @media (min-width: 769px) {
+            .sidebar.open + .main-content {
+                margin-left: var(--sidebar-width);
+            }
+        }
+
+        /* Small mobile devices */
+        @media (max-width: 576px) {
+            .navbar-brand span {
+                max-width: 120px;
+            }
+
+            .navbar-brand img {
+                height: 24px;
+            }
+
+            .main-content {
+                padding: 12px;
+            }
+        }
+
+        /* Prevent body scroll when sidebar is open */
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
+        /* Install button */
+        .install-button {
+            display: none;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 1rem;
+            margin-left: 8px;
+            transition: background-color 0.2s;
+            min-height: 40px;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .install-button:hover {
+            background: var(--primary-dark);
+        }
+
+        @media (max-width: 768px) {
+            .install-button {
+                min-height: 48px;
+                padding: 12px 20px;
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Add overlay div -->
-    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeNav()"></div>
+    <!-- Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
     <!-- Sidebar -->
     <div id="mySidebar" class="sidebar">
-        <div class="sidebar-header">
-            <button class="closebtn" onclick="closeNav()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="sidebar-section">
+        <ul class="sidebar-menu">
             {% if current_user.is_authenticated %}
-                <a href="{{ url_for('main.index') }}">
-                    <i class="fas fa-home"></i>
-                    <span>Home</span>
-                </a>
+                <li>
+                    <a href="{{ url_for('main.index') }}" {% if request.endpoint == 'main.index' %}class="active"{% endif %}>
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
             {% endif %}
-            <a href="{{ url_for('main.chart') }}">
-                <i class="fas fa-chart-line"></i>
-                <span>Budget Analysis</span>
-            </a>
-            <a href="{{ url_for('main.help') }}">
-                <i class="fas fa-question-circle"></i>
-                <span>Help</span>
-            </a>
-            <a href="{{ url_for('main.feedback') }}">
-                <i class="fas fa-comment-alt"></i>
-                <span>Feedback</span>
-            </a>
-        </div>
-
-        <div class="sidebar-section">
-            <div class="sidebar-section-title">Account</div>
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('main.logout') }}">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
+            <li>
+                <a href="{{ url_for('main.chart') }}" {% if request.endpoint == 'main.chart' %}class="active"{% endif %}>
+                    <i class="fas fa-chart-line"></i>
+                    <span>Budget Analysis</span>
                 </a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.help') }}" {% if request.endpoint == 'main.help' %}class="active"{% endif %}>
+                    <i class="fas fa-question-circle"></i>
+                    <span>Help</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.feedback') }}" {% if request.endpoint == 'main.feedback' %}class="active"{% endif %}>
+                    <i class="fas fa-comment-alt"></i>
+                    <span>Feedback</span>
+                </a>
+            </li>
+            <li class="mt-4">
+                <div class="sidebar-section-title px-4 py-2 text-muted">Account</div>
+            </li>
+            {% if current_user.is_authenticated %}
+                <li>
+                    <a href="{{ url_for('main.logout') }}">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
             {% else %}
-                <a href="{{ url_for('main.login') }}">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <span>Login</span>
-                </a>
-                <a href="{{ url_for('main.signup') }}">
-                    <i class="fas fa-user-plus"></i>
-                    <span>Signup</span>
-                </a>
+                <li>
+                    <a href="{{ url_for('main.login') }}">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Login</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('main.signup') }}">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Signup</span>
+                    </a>
+                </li>
             {% endif %}
-        </div>
+        </ul>
     </div>
 
     <!-- Main content -->
     <div id="main">
-        <nav class="navbar navbar-expand-lg navbar-dark">
+        <nav class="navbar">
             <div class="container-fluid">
-                <button class="openbtn" onclick="toggleNav()">
+                <button class="openbtn" id="openbtn" aria-label="Toggle navigation">
                     <i class="fas fa-bars"></i>
                 </button>
-                <a class="navbar-brand" href="{{ url_for('main.index') }}">BudgetMate</a>
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                    <img src="{{ url_for('static', filename='icons/favicon-32x32.png') }}" alt="BudgetMate Logo">
+                    <span>BudgetMate</span>
+                </a>
                 <div class="d-flex align-items-center">
                     {% if not current_user.is_authenticated %}
-                        <a class="btn btn-outline-light me-2" href="{{ url_for('main.login') }}">Login</a>
-                        <a class="btn btn-outline-light" href="{{ url_for('main.signup') }}">Signup</a>
+                        <a class="btn btn-outline me-2" href="{{ url_for('main.login') }}">Login</a>
+                        <a class="btn btn-primary" href="{{ url_for('main.signup') }}">Signup</a>
                     {% endif %}
                     <button id="install-button" class="install-button">
-                        <i class="fas fa-download"></i> Install
+                        <i class="fas fa-download"></i>
+                        <span>Install</span>
                     </button>
                 </div>
             </div>
         </nav>
 
-        <div class="container">
-            {% with messages = get_flashed_messages() %}
+        <div class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-info">{{ message }}</div>
-                    {% endfor %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message alert alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
             {% endwith %}
 
@@ -385,171 +462,133 @@
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function toggleNav() {
-            const sidebar = document.getElementById("mySidebar");
-            const overlay = document.getElementById("sidebarOverlay");
-            const main = document.getElementById("main");
-            
-            sidebar.classList.toggle("open");
-            main.classList.toggle("shifted");
-            
-            if (window.innerWidth <= 768) {
-                if (sidebar.classList.contains("open")) {
-                    overlay.classList.add("active");
-                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
-                } else {
-                    overlay.classList.remove("active");
-                    document.body.style.overflow = ''; // Restore scrolling
-                }
-            }
-        }
-
-        function closeNav() {
-            const sidebar = document.getElementById("mySidebar");
-            const overlay = document.getElementById("sidebarOverlay");
-            const main = document.getElementById("main");
-            
-            sidebar.classList.remove("open");
-            main.classList.remove("shifted");
-            overlay.classList.remove("active");
-            document.body.style.overflow = ''; // Restore scrolling
-        }
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById("mySidebar");
-            const openbtn = document.querySelector('.openbtn');
-            const overlay = document.getElementById("sidebarOverlay");
-            
-            if (window.innerWidth <= 768 && 
-                !sidebar.contains(event.target) && 
-                !openbtn.contains(event.target) && 
-                sidebar.classList.contains("open")) {
-                closeNav();
-            }
-        });
-
-        // Close sidebar on window resize if open
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 768) {
-                const sidebar = document.getElementById("mySidebar");
-                const overlay = document.getElementById("sidebarOverlay");
-                if (sidebar.classList.contains("open")) {
-                    sidebar.classList.remove("open");
-                    overlay.classList.remove("active");
-                    document.body.style.overflow = '';
-                }
-            }
-        });
-
-        // PWA Installation
-        let deferredPrompt;
-        const installButton = document.getElementById('install-button');
-        let installPromptShown = false;
-
-        // Check if already installed
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            installButton.style.display = 'none';
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // Only show install button if not already shown and not installed
-            if (!installPromptShown && !window.matchMedia('(display-mode: standalone)').matches) {
-                installButton.style.display = 'inline-flex';
-                installPromptShown = true;
-            }
-        });
-
-        installButton.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response to the install prompt: ${outcome}`);
-                deferredPrompt = null;
-                installButton.style.display = 'none';
-            }
-        });
-
-        // Hide install button if app is already installed
-        window.addEventListener('appinstalled', () => {
-            installButton.style.display = 'none';
-        });
-
-        // Improve mobile interactions
         document.addEventListener('DOMContentLoaded', function() {
-            // Prevent double-tap zoom on buttons
-            const buttons = document.querySelectorAll('button, .btn, .nav-link, .sidebar a');
-            buttons.forEach(button => {
-                button.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    this.click();
-                }, { passive: false });
-            });
-
-            // Improve sidebar touch handling
+            // Get DOM elements
             const sidebar = document.getElementById('mySidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            
-            if (sidebar && overlay) {
-                let touchStartX = 0;
-                let touchEndX = 0;
+            const openbtn = document.getElementById('openbtn');
+            const main = document.getElementById('main');
+            let touchStartX = 0;
+            let touchEndX = 0;
 
-                sidebar.addEventListener('touchstart', function(e) {
-                    touchStartX = e.changedTouches[0].screenX;
-                }, { passive: true });
-
-                sidebar.addEventListener('touchend', function(e) {
-                    touchEndX = e.changedTouches[0].screenX;
-                    handleSwipe();
-                }, { passive: true });
-
-                function handleSwipe() {
-                    const swipeThreshold = 50;
-                    if (touchEndX < touchStartX - swipeThreshold) {
-                        // Swipe left - close sidebar
-                        closeNav();
-                    }
-                }
-
-                // Close sidebar when clicking overlay
-                overlay.addEventListener('click', closeNav);
-                overlay.addEventListener('touchstart', closeNav, { passive: true });
+            // Function to open sidebar
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
             }
 
-            // Prevent body scroll when sidebar is open
-            function toggleNav() {
-                const sidebar = document.getElementById("mySidebar");
-                const overlay = document.getElementById("sidebarOverlay");
-                const main = document.getElementById("main");
+            // Function to close sidebar
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+
+            // Function to toggle sidebar
+            function toggleSidebar(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
                 
-                sidebar.classList.toggle("open");
-                main.classList.toggle("shifted");
-                
-                if (window.innerWidth <= 768) {
-                    if (sidebar.classList.contains("open")) {
-                        overlay.classList.add("active");
-                        document.body.style.overflow = 'hidden';
-                    } else {
-                        overlay.classList.remove("active");
-                        document.body.style.overflow = '';
-                    }
+                if (sidebar.classList.contains('open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
                 }
             }
 
-            // Close sidebar on window resize
+            // Toggle sidebar on menu button click
+            openbtn.addEventListener('click', toggleSidebar);
+
+            // Close sidebar when clicking overlay
+            overlay.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeSidebar();
+            });
+
+            // Handle touch events for swipe
+            sidebar.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            sidebar.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                if (touchStartX - touchEndX > 50) { // Swipe left
+                    closeSidebar();
+                }
+            }, { passive: true });
+
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768 && 
+                    sidebar.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    !openbtn.contains(e.target)) {
+                    closeSidebar();
+                }
+            });
+
+            // Handle window resize
             window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    const sidebar = document.getElementById("mySidebar");
-                    const overlay = document.getElementById("sidebarOverlay");
-                    if (sidebar.classList.contains("open")) {
-                        sidebar.classList.remove("open");
-                        overlay.classList.remove("active");
-                        document.body.style.overflow = '';
-                    }
+                if (window.innerWidth <= 768) {
+                    closeSidebar();
                 }
+            });
+
+            // Close sidebar when pressing Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    closeSidebar();
+                }
+            });
+
+            // PWA Installation
+            let deferredPrompt;
+            const installButton = document.getElementById('install-button');
+
+            // Check if already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                installButton.style.display = 'none';
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installButton.style.display = 'inline-flex';
+            });
+
+            installButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`User response to the install prompt: ${outcome}`);
+                    deferredPrompt = null;
+                    installButton.style.display = 'none';
+                }
+            });
+
+            // Hide install button if app is already installed
+            window.addEventListener('appinstalled', () => {
+                installButton.style.display = 'none';
+            });
+
+            // Auto-hide flash messages
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(message => {
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateX(100%)';
+                    setTimeout(() => message.remove(), 300);
+                }, 5000);
+            });
+
+            // Debug logging
+            console.log('Sidebar initialized');
+            openbtn.addEventListener('click', function() {
+                console.log('Menu button clicked');
+                console.log('Sidebar classes:', sidebar.classList.toString());
             });
         });
     </script>

@@ -120,11 +120,16 @@ def signup():
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user = User.query.filter_by(email=request.form['email']).first()
-        if user and check_password_hash(user.password, request.form['password']):
-            login_user(user, remember=True)
-            return redirect(url_for('main.dashboard'))
-        flash('Invalid credentials')
+        try:
+            user = User.query.filter_by(email=request.form['email']).first()
+            if user and check_password_hash(user.password, request.form['password']):
+                login_user(user, remember=True)
+                return redirect(url_for('main.index'))
+            flash('Invalid email or password', 'error')
+        except Exception as e:
+            current_app.logger.error(f'Login error: {e}')
+            current_app.logger.error(traceback.format_exc())
+            flash('An error occurred during login. Please try again.', 'error')
     return render_template('login.html')
 
 @main.route('/logout')
@@ -139,39 +144,46 @@ def logout():
 def add_transaction():
     try:
         # Validate amount
-        amount = request.form['amount']
+        amount = request.form.get('amount')
         if not amount or float(amount) <= 0:
-            flash('Please enter a valid amount greater than 0')
-            return redirect(url_for('main.dashboard'))
+            flash('Please enter a valid amount greater than 0', 'error')
+            return redirect(url_for('main.index'))
 
         # Validate category
-        category = request.form['category']
+        category = request.form.get('category')
         if not category:
-            flash('Please select a category')
-            return redirect(url_for('main.dashboard'))
+            flash('Please select a category', 'error')
+            return redirect(url_for('main.index'))
 
         # Validate type
-        type = request.form['type']
+        type = request.form.get('type')
         if type not in ['income', 'expense']:
-            flash('Invalid transaction type')
-            return redirect(url_for('main.dashboard'))
+            flash('Invalid transaction type', 'error')
+            return redirect(url_for('main.index'))
 
-        t = Transaction(
+        # Create and save transaction
+        transaction = Transaction(
             amount=float(amount),
             category=category,
             type=type,
             note=request.form.get('note', ''),
-            user_id=current_user.id
+            user_id=current_user.id,
+            date=datetime.now()  # Explicitly set the date
         )
-        db.session.add(t)
+        
+        db.session.add(transaction)
         db.session.commit()
-        flash('Transaction added successfully!')
+        flash('Transaction added successfully!', 'success')
+        
     except ValueError:
-        flash('Invalid amount format')
+        flash('Invalid amount format. Please enter a valid number.', 'error')
     except Exception as e:
         db.session.rollback()
-        flash('An error occurred while adding the transaction')
-    return redirect(url_for('main.dashboard'))
+        current_app.logger.error(f'Error adding transaction: {e}')
+        current_app.logger.error(traceback.format_exc())
+        flash('An error occurred while adding the transaction. Please try again.', 'error')
+    
+    return redirect(url_for('main.index'))
 
 @main.route('/chart')
 @login_required

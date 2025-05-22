@@ -677,34 +677,42 @@
     <!-- Add Transaction Form -->
     <div class="transaction-form">
         <h4>Add Transaction</h4>
-        <form method="POST" action="{{ url_for('main.add_transaction') }}">
+        <form method="POST" action="{{ url_for('main.add_transaction') }}" id="transactionForm" onsubmit="return validateForm()">
             <div class="row g-3">
                 <div class="col-12 col-sm-6 col-md-3">
                     <div class="form-group">
-                        <input type="number" step="0.01" name="amount" class="form-control" placeholder="Amount" required>
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" step="0.01" min="0.01" name="amount" id="amount" class="form-control" placeholder="Enter amount" required>
+                        <div class="invalid-feedback">Please enter a valid amount greater than 0</div>
                     </div>
                 </div>
                 <div class="col-12 col-sm-6 col-md-3">
                     <div class="form-group">
-                        <input type="text" name="category" class="form-control" placeholder="Category" required>
+                        <label for="category" class="form-label">Category</label>
+                        <input type="text" name="category" id="category" class="form-control" placeholder="Enter category" required>
+                        <div class="invalid-feedback">Please enter a category</div>
                     </div>
                 </div>
                 <div class="col-12 col-sm-6 col-md-2">
                     <div class="form-group">
-                        <select name="type" class="form-control" required>
+                        <label for="type" class="form-label">Type</label>
+                        <select name="type" id="type" class="form-control" required>
                             <option value="">Select Type</option>
                             <option value="income">Income</option>
                             <option value="expense">Expense</option>
                         </select>
+                        <div class="invalid-feedback">Please select a type</div>
                     </div>
                 </div>
                 <div class="col-12 col-sm-6 col-md-3">
                     <div class="form-group">
-                        <input type="text" name="note" class="form-control" placeholder="Note (optional)">
+                        <label for="note" class="form-label">Note (optional)</label>
+                        <input type="text" name="note" id="note" class="form-control" placeholder="Add a note">
                     </div>
                 </div>
                 <div class="col-12 col-md-1">
-                    <button type="submit" class="btn btn-primary w-100">
+                    <label class="form-label d-none d-md-block">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100" id="submitBtn">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -844,6 +852,51 @@
 </div>
 
 <script>
+    // Form validation
+    function validateForm() {
+        const form = document.getElementById('transactionForm');
+        const amount = document.getElementById('amount');
+        const category = document.getElementById('category');
+        const type = document.getElementById('type');
+        let isValid = true;
+
+        // Reset previous validation
+        form.classList.remove('was-validated');
+        [amount, category, type].forEach(input => {
+            input.classList.remove('is-invalid');
+        });
+
+        // Validate amount
+        if (!amount.value || parseFloat(amount.value) <= 0) {
+            amount.classList.add('is-invalid');
+            isValid = false;
+        }
+
+        // Validate category
+        if (!category.value.trim()) {
+            category.classList.add('is-invalid');
+            isValid = false;
+        }
+
+        // Validate type
+        if (!type.value) {
+            type.classList.add('is-invalid');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            form.classList.add('was-validated');
+            return false;
+        }
+
+        // Disable submit button and show loading state
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        return true;
+    }
+
     // Add auto-refresh functionality
     function refreshPage() {
         location.reload();
@@ -867,6 +920,10 @@
         const forms = document.querySelectorAll('form');
         forms.forEach(form => {
             form.addEventListener('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                    return;
+                }
                 const submitButton = form.querySelector('button[type="submit"]');
                 if (submitButton) {
                     submitButton.disabled = true;
