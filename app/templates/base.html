@@ -189,60 +189,95 @@
                 margin: 0 8px;
             }
         }
-    </style>
 
-    <!-- Add PWA Installation Prompt -->
-    <div id="pwa-install-prompt" class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="display: none; z-index: 1050;">
-        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto">Install BudgetMate</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                Install BudgetMate on your device for quick and easy access when you're on the go.
-                <div class="mt-2 pt-2 border-top">
-                    <button type="button" class="btn btn-primary btn-sm" id="pwa-install-button">Install</button>
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">Not now</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful');
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
-            });
+        /* Install button styles */
+        .install-button {
+            display: none; /* Hidden by default */
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 14px;
+            margin-left: 8px;
+            transition: background-color 0.2s;
         }
 
-        // PWA Installation Prompt
-        let deferredPrompt;
-        const installPrompt = document.getElementById('pwa-install-prompt');
-        const installButton = document.getElementById('pwa-install-button');
+        .install-button:hover {
+            background-color: #3367d6;
+        }
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installPrompt.style.display = 'block';
-        });
+        .install-button i {
+            margin-right: 4px;
+        }
 
-        installButton.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response to the install prompt: ${outcome}`);
-                deferredPrompt = null;
-                installPrompt.style.display = 'none';
+        /* Mobile responsive improvements */
+        @media screen and (max-width: 768px) {
+            .navbar .container-fluid {
+                padding: 0 12px;
             }
-        });
-    </script>
+
+            .navbar-brand {
+                font-size: 18px;
+            }
+
+            .btn-outline-light {
+                padding: 4px 12px;
+                font-size: 13px;
+            }
+
+            .install-button {
+                padding: 4px 12px;
+                font-size: 13px;
+            }
+
+            .container {
+                padding: 12px;
+            }
+
+            /* Improve mobile sidebar */
+            .sidebar {
+                width: 100%;
+                max-width: 280px;
+            }
+
+            .sidebar.open {
+                width: 100%;
+                max-width: 280px;
+            }
+
+            /* Improve mobile content */
+            #main {
+                padding: 0;
+            }
+
+            .dashboard-container {
+                padding: 12px;
+            }
+
+            /* Make tables more mobile-friendly */
+            .table-responsive {
+                margin: 0 -12px;
+                padding: 0 12px;
+            }
+
+            .table td, .table th {
+                padding: 8px;
+                font-size: 13px;
+            }
+
+            /* Improve form elements on mobile */
+            .form-control {
+                font-size: 16px;
+                padding: 8px 12px;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Sidebar -->
@@ -307,6 +342,9 @@
                         <a class="btn btn-outline-light me-2" href="{{ url_for('main.login') }}">Login</a>
                         <a class="btn btn-outline-light" href="{{ url_for('main.signup') }}">Signup</a>
                     {% endif %}
+                    <button id="install-button" class="install-button">
+                        <i class="fas fa-download"></i> Install
+                    </button>
                 </div>
             </div>
         </nav>
@@ -354,6 +392,42 @@
                 sidebar.classList.remove("open");
                 main.classList.remove("shifted");
             }
+        });
+
+        // PWA Installation
+        let deferredPrompt;
+        const installButton = document.getElementById('install-button');
+        let installPromptShown = false;
+
+        // Check if already installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            installButton.style.display = 'none';
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Only show install button if not already shown and not installed
+            if (!installPromptShown && !window.matchMedia('(display-mode: standalone)').matches) {
+                installButton.style.display = 'inline-flex';
+                installPromptShown = true;
+            }
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                deferredPrompt = null;
+                installButton.style.display = 'none';
+            }
+        });
+
+        // Hide install button if app is already installed
+        window.addEventListener('appinstalled', () => {
+            installButton.style.display = 'none';
         });
     </script>
 </body>
