@@ -48,7 +48,7 @@ def login():
     if request.method == 'POST':
         user = User.query.filter_by(email=request.form['email']).first()
         if user and check_password_hash(user.password, request.form['password']):
-            login_user(user)
+            login_user(user, remember=True)
             return redirect(url_for('main.dashboard'))
         flash('Invalid credentials')
     return render_template('login.html')
