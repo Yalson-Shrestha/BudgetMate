@@ -20,317 +20,88 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* Base styles */
         :root {
-            --sidebar-bg: #0f0f0f;
-            --sidebar-hover: #272727;
-            --text-color: #ffffff;
-            --text-secondary: #aaaaaa;
-            --navbar-height: 56px;
+            --primary-color: #4285f4;
+            --text-color: #0f0f0f;
+            --text-secondary: #606060;
+            --border-color: #e0e0e0;
+            --background-light: #f8f9fa;
+            --sidebar-width: 250px;
+            --navbar-height: 60px;
+            --transition-speed: 0.3s;
         }
 
         body {
-            background-color: #f9f9f9;
-            padding-top: var(--navbar-height);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: var(--background-light);
+            color: var(--text-color);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* Navbar styles */
         .navbar {
-            background-color: var(--sidebar-bg) !important;
-            padding: 0 16px;
             height: var(--navbar-height);
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            z-index: 1001;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
+            z-index: 1000;
+            padding: 0;
         }
 
         .navbar .container-fluid {
+            height: 100%;
             display: flex;
             align-items: center;
-            height: 100%;
-            padding: 0;
+            padding: 0 16px;
         }
 
         .navbar-brand {
-            font-size: 1.25rem;
-            font-weight: 500;
-            color: var(--text-color) !important;
-            text-decoration: none;
             display: flex;
             align-items: center;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--text-color);
+            text-decoration: none;
+            margin-right: 24px;
         }
 
         .navbar-brand img {
             height: 32px;
             width: auto;
-            margin-right: 8px;
         }
 
-        .btn-outline-light {
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 14px;
-        }
-
-        .btn-outline-light:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+        .navbar-brand span {
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* Sidebar styles */
         .sidebar {
-            height: calc(100vh - var(--navbar-height));
-            width: 0;
             position: fixed;
-            z-index: 1000;
             top: var(--navbar-height);
             left: 0;
-            background-color: var(--sidebar-bg);
-            overflow-x: hidden;
-            transition: 0.3s ease;
-            padding-top: 12px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: white;
+            box-shadow: 1px 0 3px rgba(0,0,0,0.1);
+            z-index: 900;
+            transform: translateX(0);
+            transition: transform var(--transition-speed) ease;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .sidebar-header {
-            padding: 0 24px 12px 24px;
-            border-bottom: 1px solid #272727;
-            margin-bottom: 12px;
-        }
-
-        .sidebar-section {
-            padding: 8px 0;
-            border-bottom: 1px solid #272727;
-        }
-
-        .sidebar-section-title {
-            color: var(--text-secondary);
-            font-size: 16px;
-            font-weight: 500;
-            padding: 8px 24px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .sidebar a {
-            padding: 8px 24px;
-            text-decoration: none;
-            font-size: 14px;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            transition: background-color 0.2s;
-            height: 40px;
-            border-radius: 10px;
-            margin: 0 12px;
-        }
-
-        .sidebar a:hover {
-            background-color: var(--sidebar-hover);
-        }
-
-        .sidebar a i {
-            width: 24px;
-            font-size: 18px;
-            margin-right: 24px;
-            color: var(--text-color);
-        }
-
-        .sidebar .closebtn {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            font-size: 24px;
-            color: var(--text-color);
-            background: none;
-            border: none;
-            padding: 8px;
-            cursor: pointer;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .sidebar .closebtn:hover {
-            background-color: var(--sidebar-hover);
-        }
-
-        .openbtn {
-            font-size: 20px;
-            cursor: pointer;
-            background-color: transparent;
-            color: var(--text-color);
-            padding: 8px;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
-        }
-
-        .openbtn:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        #main {
-            transition: margin-left 0.3s ease;
-            min-height: calc(100vh - var(--navbar-height));
-        }
-
-        /* When the sidebar is open */
-        .sidebar.open {
-            width: 240px;
-        }
-
-        /* Add margin to main content when sidebar is open */
-        #main.shifted {
-            margin-left: 240px;
-        }
-
-        /* Responsive adjustments */
-        @media screen and (max-width: 768px) {
-            #main.shifted {
-                margin-left: 0;
-            }
-            .sidebar.open {
-                width: 240px;
-            }
-            .sidebar a {
-                margin: 0 8px;
-            }
-            .navbar {
-                padding: 0 12px;
-            }
-            .navbar-brand {
-                font-size: 1.1rem;
-                max-width: 150px;
-            }
-            .navbar-brand img {
-                height: 28px;
-            }
-            .openbtn {
-                margin-right: 12px;
-            }
-        }
-
-        @media screen and (max-width: 576px) {
-            .navbar-brand {
-                font-size: 1rem;
-                max-width: 120px;
-            }
-            .navbar-brand img {
-                height: 24px;
-            }
-        }
-
-        /* Install button styles */
-        .install-button {
-            display: none; /* Hidden by default */
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 14px;
-            margin-left: 8px;
-            transition: background-color 0.2s;
-        }
-
-        .install-button:hover {
-            background-color: #3367d6;
-        }
-
-        .install-button i {
-            margin-right: 4px;
-        }
-
-        /* Mobile responsive improvements */
-        @media screen and (max-width: 768px) {
-            .navbar .container-fluid {
-                padding: 0 12px;
-            }
-
-            .navbar-brand {
-                font-size: 1.1rem;
-                max-width: 150px;
-                padding: 0;
-                margin: 0;
-                display: flex;
-                align-items: center;
-                height: 100%;
-            }
-
-            .openbtn {
-                width: 44px;
-                height: 44px;
-                margin-right: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                -webkit-tap-highlight-color: transparent;
-            }
-
-            .sidebar {
-                width: 100%;
-                max-width: 280px;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
-            .sidebar a {
-                height: 48px;
-                margin: 4px 8px;
-                padding: 0 16px;
-                display: flex;
-                align-items: center;
-                -webkit-tap-highlight-color: transparent;
-            }
-
-            .sidebar .closebtn {
-                width: 48px;
-                height: 48px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                -webkit-tap-highlight-color: transparent;
-            }
-
-            .btn-outline-light,
-            .install-button {
-                min-height: 44px;
-                padding: 8px 16px;
-                font-size: 14px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                -webkit-tap-highlight-color: transparent;
-            }
-
-            .install-button i {
-                margin-right: 4px;
-            }
-        }
-
-        /* Sidebar improvements */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -338,23 +109,87 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+            background: rgba(0,0,0,0.5);
+            z-index: 800;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity var(--transition-speed) ease;
         }
 
         .sidebar-overlay.active {
             opacity: 1;
         }
 
-        @media screen and (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
+        .sidebar-menu {
+            list-style: none;
+            padding: 16px 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin: 4px 0;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            gap: 12px;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: var(--background-light);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu a i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--navbar-height);
+            padding: 24px;
+            min-height: calc(100vh - var(--navbar-height));
+            transition: margin-left var(--transition-speed) ease;
+        }
+
+        /* Mobile menu button */
+        .openbtn {
+            display: none;
+            background: none;
+            border: none;
+            padding: 8px;
+            margin-right: 16px;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            line-height: 1;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            :root {
+                --sidebar-width: 280px;
             }
 
-            .sidebar.open {
+            .openbtn {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
                 transform: translateX(0);
             }
 
@@ -362,53 +197,102 @@
                 display: block;
             }
 
-            .sidebar-overlay.active {
-                display: block;
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
             }
 
-            /* Improve sidebar touch targets */
-            .sidebar a {
-                height: 48px;
-                margin: 4px 8px;
+            .navbar-brand span {
+                max-width: 150px;
             }
 
-            .sidebar .closebtn {
-                width: 48px;
-                height: 48px;
+            .navbar-brand img {
+                height: 28px;
+            }
+
+            /* Improve touch targets */
+            .sidebar-menu a {
+                padding: 16px 24px;
+                min-height: 48px;
+            }
+
+            .openbtn {
+                min-width: 48px;
+                min-height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Prevent text selection on buttons */
+            .openbtn,
+            .sidebar-menu a,
+            .navbar-brand {
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                user-select: none;
             }
         }
 
-        /* Prevent text selection on buttons */
-        .btn,
-        .nav-link,
-        .sidebar a,
-        .openbtn,
-        .closebtn,
-        .install-button {
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
+        /* Small mobile devices */
+        @media (max-width: 576px) {
+            .navbar-brand span {
+                max-width: 120px;
+            }
+
+            .navbar-brand img {
+                height: 24px;
+            }
+
+            .main-content {
+                padding: 12px;
+            }
         }
 
-        /* Improve touch feedback */
-        .btn:active,
-        .nav-link:active,
-        .sidebar a:active,
-        .openbtn:active,
-        .closebtn:active,
-        .install-button:active {
-            opacity: 0.8;
+        /* Prevent body scroll when sidebar is open */
+        body.sidebar-open {
+            overflow: hidden;
         }
 
-        /* Prevent zoom on input focus for iOS */
-        input[type="text"],
-        input[type="number"],
-        input[type="email"],
-        input[type="password"],
-        select,
-        textarea {
-            font-size: 16px !important;
+        /* Flash messages */
+        .flash-messages {
+            position: fixed;
+            top: calc(var(--navbar-height) + 16px);
+            right: 16px;
+            z-index: 1100;
+            max-width: 100%;
+            width: 350px;
+        }
+
+        .flash-message {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .flash-messages {
+                left: 16px;
+                right: 16px;
+                width: auto;
+            }
         }
     </style>
 </head>

@@ -87,16 +87,32 @@
 
     .contact-support p {
         margin-bottom: 12px;
+        font-size: 1.1rem;
     }
 
     .contact-support a {
         color: #4285f4;
         text-decoration: none;
         font-weight: 500;
+        display: inline-block;
+        padding: 12px 24px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        transition: all 0.2s ease;
+        min-width: 200px;
+        margin: 8px 0;
     }
 
     .contact-support a:hover {
-        text-decoration: underline;
+        background: #4285f4;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .contact-support a i {
+        margin-right: 8px;
     }
 
     @media (max-width: 768px) {
@@ -114,11 +130,27 @@
         }
 
         .help-list li {
-            padding: 10px 0;
+            padding: 12px 0;
         }
 
         .help-list li h3 {
+            font-size: 1.1rem;
+        }
+
+        .help-list li p {
             font-size: 1rem;
+        }
+
+        .contact-support {
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .contact-support a {
+            width: 100%;
+            text-align: center;
+            padding: 16px;
+            font-size: 1.1rem;
         }
     }
 </style>
@@ -213,7 +245,9 @@
 
     <div class="contact-support">
         <p>Need more help? Contact us at</p>
-        <a href="yalsonshrestha100@gmail.com">yalsonshrestha100@gmail.com</a>
+        <a href="mailto:yalsonshrestha100@gmail.com?subject=BudgetMate%20Support%20Request">
+            <i class="fas fa-envelope"></i> Send Email
+        </a>
     </div>
 </div>
 {% endblock %} 

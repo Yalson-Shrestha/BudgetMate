@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .error-container {
+        max-width: 600px;
+        margin: 48px auto;
+        padding: 24px;
+        text-align: center;
+    }
+
+    .error-icon {
+        font-size: 64px;
+        color: #dc3545;
+        margin-bottom: 24px;
+    }
+
+    .error-title {
+        font-size: 24px;
+        color: #0f0f0f;
+        margin-bottom: 16px;
+    }
+
+    .error-message {
+        color: #606060;
+        margin-bottom: 24px;
+        line-height: 1.6;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+    }
+
+    .error-actions .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+        background: #4285f4;
+        color: white;
+        border: none;
+    }
+
+    .btn-secondary {
+        background: #f8f9fa;
+        color: #0f0f0f;
+        border: 1px solid #e0e0e0;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 768px) {
+        .error-container {
+            margin: 32px auto;
+            padding: 16px;
+        }
+
+        .error-icon {
+            font-size: 48px;
+        }
+
+        .error-title {
+            font-size: 20px;
+        }
+
+        .error-actions {
+            flex-direction: column;
+        }
+
+        .error-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="error-container">
+    <div class="error-icon">
+        <i class="fas fa-exclamation-circle"></i>
+    </div>
+    
+    <h1 class="error-title">
+        {% if error.code == 404 %}
+            Page Not Found
+        {% elif error.code == 500 %}
+            Internal Server Error
+        {% else %}
+            An Error Occurred
+        {% endif %}
+    </h1>
+    
+    <p class="error-message">
+        {% if error.code == 404 %}
+            The page you're looking for doesn't exist or has been moved.
+        {% elif error.code == 500 %}
+            We're sorry, but something went wrong on our end. Please try again later.
+        {% else %}
+            {{ error.description if error.description else 'An unexpected error occurred. Please try again.' }}
+        {% endif %}
+    </p>
+    
+    <div class="error-actions">
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+            <i class="fas fa-home"></i> Go to Dashboard
+        </a>
+        <a href="javascript:history.back()" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Go Back
+        </a>
+    </div>
+</div>
+{% endblock %} 

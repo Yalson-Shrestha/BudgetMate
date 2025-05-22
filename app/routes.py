@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import login_user, login_required, logout_user, current_user
 from .models import db, User, Transaction
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,8 +6,28 @@ from datetime import date, datetime, timedelta
 from sqlalchemy import extract, func
 from urllib.parse import quote
 from calendar import monthrange
+import traceback
 
 main = Blueprint('main', __name__)
+
+# Error handlers
+@main.errorhandler(404)
+def not_found_error(error):
+    return render_template('error.html', error=error), 404
+
+@main.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    current_app.logger.error(f'Server Error: {error}')
+    current_app.logger.error(traceback.format_exc())
+    return render_template('error.html', error=error), 500
+
+@main.errorhandler(Exception)
+def unhandled_exception(e):
+    db.session.rollback()
+    current_app.logger.error(f'Unhandled Exception: {e}')
+    current_app.logger.error(traceback.format_exc())
+    return render_template('error.html', error=e), 500
 
 @main.route('/')
 @login_required
@@ -195,9 +215,14 @@ def chart():
     )
 
 @main.route('/help')
-@login_required
 def help():
-    return render_template('help.html')
+    try:
+        return render_template('help.html')
+    except Exception as e:
+        current_app.logger.error(f'Error in help route: {e}')
+        current_app.logger.error(traceback.format_exc())
+        flash('An error occurred while loading the help page. Please try again.', 'error')
+        return redirect(url_for('main.index'))
 
 @main.route('/feedback')
 @login_required
