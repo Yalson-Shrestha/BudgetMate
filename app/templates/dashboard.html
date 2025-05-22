@@ -453,6 +453,173 @@
             width: 100%;
         }
     }
+
+    /* Mobile button improvements */
+    .btn, 
+    .btn-primary,
+    .btn-danger,
+    .btn-secondary,
+    .delete-transaction,
+    .nav-link,
+    .analysis-button {
+        min-height: 44px; /* Minimum touch target size */
+        min-width: 44px;
+        padding: 12px 20px;
+        font-size: 16px; /* Prevent zoom on iOS */
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    /* Improve form controls for mobile */
+    .form-control,
+    .form-select {
+        min-height: 44px;
+        font-size: 16px;
+        padding: 8px 12px;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    /* Improve table interactions */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x pan-y;
+    }
+
+    .table td, 
+    .table th {
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    /* Improve delete button */
+    .delete-transaction {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        margin: -8px; /* Compensate for the larger touch target */
+        border-radius: 50%;
+        background: transparent;
+        transition: background-color 0.2s;
+    }
+
+    .delete-transaction:active {
+        background-color: #fce8e6;
+    }
+
+    /* Improve modal for mobile */
+    .modal-dialog {
+        margin: 16px;
+        max-width: calc(100% - 32px);
+    }
+
+    .modal-content {
+        border-radius: 16px;
+    }
+
+    .modal-footer .btn {
+        flex: 1;
+        margin: 0 8px;
+    }
+
+    /* Improve month selector */
+    .month-selector select {
+        min-height: 44px;
+        padding: 8px 16px;
+        font-size: 16px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23606060' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 12px;
+        padding-right: 36px;
+    }
+
+    /* Improve transaction form */
+    .transaction-form .btn-primary {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .transaction-form .btn-primary i {
+        font-size: 18px;
+    }
+
+    /* Improve tab navigation */
+    .nav-tabs {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        margin: 0 -16px;
+        padding: 0 16px;
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-tabs .nav-link {
+        white-space: nowrap;
+        padding: 12px 20px;
+        margin: 0 4px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        color: #606060;
+        border: none;
+    }
+
+    .nav-tabs .nav-link.active {
+        background: #4285f4;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 12px;
+        }
+
+        .transaction-form {
+            padding: 16px;
+        }
+
+        .transaction-form .row > div {
+            margin-bottom: 16px;
+        }
+
+        .table-container {
+            margin: 0 -12px;
+            border-radius: 0;
+        }
+
+        .modal-footer {
+            flex-direction: row;
+            gap: 8px;
+        }
+
+        .modal-footer .btn {
+            margin: 0;
+        }
+
+        /* Improve touch targets for mobile */
+        .btn-outline-light {
+            min-height: 44px;
+            padding: 8px 16px;
+        }
+
+        .install-button {
+            min-height: 44px;
+            padding: 8px 16px;
+        }
+    }
 </style>
 
 <div class="dashboard-container">
@@ -685,26 +852,64 @@
     // Refresh the page every minute to update the daily transactions
     setInterval(refreshPage, 60000);
 
-    // Delete transaction confirmation
+    // Improve mobile interactions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Prevent double-tap zoom on buttons
+        const buttons = document.querySelectorAll('button, .btn, .nav-link, .delete-transaction');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                this.click();
+            }, { passive: false });
+        });
+
+        // Improve form submission on mobile
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                }
+            });
+        });
+
+        // Improve modal handling on mobile
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('shown.bs.modal', function() {
+                document.body.style.overflow = 'hidden';
+            });
+            deleteModal.addEventListener('hidden.bs.modal', function() {
+                document.body.style.overflow = '';
+            });
+        }
+    });
+
+    // Improve delete transaction handling
     function confirmDelete(id, date, amount, category) {
+        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
         document.getElementById('deleteTransactionId').value = id;
         document.getElementById('deleteDate').textContent = date;
         document.getElementById('deleteAmount').textContent = amount;
         document.getElementById('deleteCategory').textContent = category;
-        
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        deleteModal.show();
+        modal.show();
     }
 
-    // Handle form submission for delete
+    // Handle form submission for delete with better mobile support
     document.getElementById('deleteForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const form = this;
-        const formData = new FormData(form);
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
+        
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
         fetch(form.action, {
             method: 'POST',
-            body: formData,
+            body: new FormData(form),
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
@@ -715,11 +920,15 @@
                 location.reload();
             } else {
                 alert('Error deleting transaction: ' + data.message);
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
             }
         })
         .catch(error => {
             console.error('Error:', error);
             alert('An error occurred while deleting the transaction');
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalText;
         });
     });
 </script>

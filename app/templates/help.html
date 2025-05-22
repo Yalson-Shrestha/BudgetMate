@@ -8,23 +8,6 @@
         padding: 24px;
     }
 
-    .help-header {
-        margin-bottom: 32px;
-        text-align: center;
-    }
-
-    .help-header h1 {
-        font-size: 32px;
-        font-weight: 500;
-        color: #0f0f0f;
-        margin-bottom: 16px;
-    }
-
-    .help-header p {
-        color: #606060;
-        font-size: 16px;
-    }
-
     .help-section {
         background: white;
         border-radius: 12px;
@@ -34,16 +17,16 @@
     }
 
     .help-section h2 {
-        font-size: 20px;
-        font-weight: 500;
         color: #0f0f0f;
+        font-size: 1.5rem;
+        font-weight: 500;
         margin-bottom: 16px;
         display: flex;
         align-items: center;
+        gap: 12px;
     }
 
     .help-section h2 i {
-        margin-right: 12px;
         color: #4285f4;
     }
 
@@ -53,120 +36,184 @@
         margin-bottom: 16px;
     }
 
-    .help-section ul {
-        list-style-type: none;
-        padding-left: 0;
-    }
-
-    .help-section li {
-        margin-bottom: 12px;
-        padding-left: 24px;
-        position: relative;
-        color: #606060;
-    }
-
-    .help-section li:before {
-        content: "•";
-        color: #4285f4;
-        position: absolute;
-        left: 8px;
-    }
-
-    .contact-info {
-        background: #e8f0fe;
-        border-radius: 8px;
-        padding: 16px;
-        margin-top: 16px;
-    }
-
-    .contact-info p {
+    .help-list {
+        list-style: none;
+        padding: 0;
         margin: 0;
-        color: #1a73e8;
     }
 
-    .contact-box {
+    .help-list li {
+        padding: 12px 0;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .help-list li:last-child {
+        border-bottom: none;
+    }
+
+    .help-list li i {
+        color: #4285f4;
+        font-size: 18px;
+        margin-top: 2px;
+    }
+
+    .help-list li div {
+        flex: 1;
+    }
+
+    .help-list li h3 {
+        color: #0f0f0f;
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+
+    .help-list li p {
+        color: #606060;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .contact-support {
         background: #f8f9fa;
         border-radius: 8px;
-        padding: 20px;
-        margin-top: 16px;
+        padding: 16px;
+        margin-top: 24px;
         text-align: center;
     }
 
-    .contact-box i {
-        font-size: 24px;
-        color: #4285f4;
+    .contact-support p {
         margin-bottom: 12px;
     }
 
-    .contact-box p {
-        color: #606060;
-        margin-bottom: 8px;
-    }
-
-    .contact-email {
+    .contact-support a {
         color: #4285f4;
         text-decoration: none;
         font-weight: 500;
-        font-size: 16px;
     }
 
-    .contact-email:hover {
+    .contact-support a:hover {
         text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        .help-container {
+            padding: 16px;
+        }
+
+        .help-section {
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .help-section h2 {
+            font-size: 1.3rem;
+        }
+
+        .help-list li {
+            padding: 10px 0;
+        }
+
+        .help-list li h3 {
+            font-size: 1rem;
+        }
     }
 </style>
 
 <div class="help-container">
-    <div class="help-header">
-        <h1>Help Center</h1>
-        <p>Find answers to common questions about using BudgetMate</p>
-    </div>
-
     <div class="help-section">
-        <h2><i class="fas fa-wallet"></i>Getting Started</h2>
-        <p>Welcome to BudgetMate! Here's how to get started with managing your finances:</p>
-        <ul>
-            <li>Sign up for a new account or log in to your existing account</li>
-            <li>Add your first transaction using the "Add Transaction" form on the dashboard</li>
-            <li>View your daily and monthly summaries in the dashboard</li>
-            <li>Check your spending patterns in the Budget Analysis section</li>
+        <h2><i class="fas fa-book"></i> Getting Started</h2>
+        <p>Welcome to BudgetMate! This guide will help you get started with managing your finances effectively.</p>
+        
+        <ul class="help-list">
+            <li>
+                <i class="fas fa-user-plus"></i>
+                <div>
+                    <h3>Creating an Account</h3>
+                    <p>Sign up with your email address and create a secure password. Your data is encrypted and protected.</p>
+                </div>
+            </li>
+            <li>
+                <i class="fas fa-plus-circle"></i>
+                <div>
+                    <h3>Adding Transactions</h3>
+                    <p>Click the "Add Transaction" button on the dashboard to record your income or expenses. Include the amount, category, and optional notes.</p>
+                </div>
+            </li>
+            <li>
+                <i class="fas fa-chart-pie"></i>
+                <div>
+                    <h3>Viewing Reports</h3>
+                    <p>Use the "Budget Analysis" feature to view detailed charts and insights about your spending patterns.</p>
+                </div>
+            </li>
         </ul>
     </div>
 
     <div class="help-section">
-        <h2><i class="fas fa-plus-circle"></i>Adding Transactions</h2>
-        <p>To add a new transaction:</p>
-        <ul>
-            <li>Go to the dashboard</li>
-            <li>Fill in the transaction form with the amount, category, and type (income/expense)</li>
-            <li>Add an optional note for additional details</li>
-            <li>Click the plus button to save the transaction</li>
+        <h2><i class="fas fa-tasks"></i> Managing Transactions</h2>
+        <p>Learn how to effectively manage your financial transactions.</p>
+        
+        <ul class="help-list">
+            <li>
+                <i class="fas fa-calendar-alt"></i>
+                <div>
+                    <h3>Monthly View</h3>
+                    <p>Use the month selector to view transactions from any month. Track your spending patterns over time.</p>
+                </div>
+            </li>
+            <li>
+                <i class="fas fa-tags"></i>
+                <div>
+                    <h3>Categories</h3>
+                    <p>Organize transactions by categories like Food, Transport, Entertainment, etc. This helps in better budget analysis.</p>
+                </div>
+            </li>
+            <li>
+                <i class="fas fa-trash-alt"></i>
+                <div>
+                    <h3>Deleting Transactions</h3>
+                    <p>Click the delete icon next to any transaction to remove it. A confirmation prompt will appear to prevent accidental deletions.</p>
+                </div>
+            </li>
         </ul>
     </div>
 
     <div class="help-section">
-        <h2><i class="fas fa-chart-pie"></i> Understanding Your Budget</h2>
-        <div class="help-content">
-            <p>Your budget is automatically calculated based on your income and expenses:</p>
-            <ul>
-                <li><strong>Monthly Income:</strong> Total of all income transactions in the current month</li>
-                <li><strong>Monthly Expenses:</strong> Total of all expense transactions in the current month</li>
-                <li><strong>Balance:</strong> The difference between your income and expenses</li>
-                <li><strong>Daily Summary:</strong> Shows your income and expenses for the current day</li>
-            </ul>
-            <p>Use the Budget Analysis page to view detailed charts and breakdowns of your spending patterns.</p>
-        </div>
+        <h2><i class="fas fa-mobile-alt"></i> Mobile Features</h2>
+        <p>BudgetMate is fully optimized for mobile devices.</p>
+        
+        <ul class="help-list">
+            <li>
+                <i class="fas fa-download"></i>
+                <div>
+                    <h3>Install as App</h3>
+                    <p>Click the "Install" button in the navigation bar to add BudgetMate to your home screen for quick access.</p>
+                </div>
+            </li>
+            <li>
+                <i class="fas fa-sync"></i>
+                <div>
+                    <h3>Offline Access</h3>
+                    <p>Once installed, BudgetMate works offline. Your data syncs automatically when you're back online.</p>
+                </div>
+            </li>
+            <li>
+                <i class="fas fa-touch"></i>
+                <div>
+                    <h3>Touch-Friendly</h3>
+                    <p>All features are optimized for touch interaction, making it easy to manage your finances on the go.</p>
+                </div>
+            </li>
+        </ul>
     </div>
 
-    <div class="help-section">
-        <h2><i class="fas fa-question-circle"></i> Still Don't Get It?</h2>
-        <div class="help-content">
-            <p>Go fuck yourself retarded ahh brain</p>
-            <div class="contact-box">
-                <i class="fas fa-envelope"></i>
-                <p>Send your questions or issues to:</p>
-                <a href="mailto:yalsonshrestha100@gmail.com" class="contact-email">yalsonshrestha100@gmail.com</a>
-            </div>
-        </div>
+    <div class="contact-support">
+        <p>Need more help? Contact us at</p>
+        <a href="yalsonshrestha100@gmail.com">yalsonshrestha100@gmail.com</a>
     </div>
 </div>
 {% endblock %} 

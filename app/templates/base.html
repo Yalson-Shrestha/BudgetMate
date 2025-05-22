@@ -266,63 +266,67 @@
             }
 
             .navbar-brand {
-                font-size: 18px;
+                font-size: 1.1rem;
+                max-width: 150px;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                height: 100%;
             }
 
-            .btn-outline-light {
-                padding: 4px 12px;
-                font-size: 13px;
+            .openbtn {
+                width: 44px;
+                height: 44px;
+                margin-right: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                -webkit-tap-highlight-color: transparent;
             }
 
-            .install-button {
-                padding: 4px 12px;
-                font-size: 13px;
-            }
-
-            .container {
-                padding: 12px;
-            }
-
-            /* Improve mobile sidebar */
             .sidebar {
                 width: 100%;
                 max-width: 280px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
             }
 
             .sidebar.open {
-                width: 100%;
-                max-width: 280px;
+                transform: translateX(0);
             }
 
-            /* Improve mobile content */
-            #main {
-                padding: 0;
+            .sidebar a {
+                height: 48px;
+                margin: 4px 8px;
+                padding: 0 16px;
+                display: flex;
+                align-items: center;
+                -webkit-tap-highlight-color: transparent;
             }
 
-            .dashboard-container {
-                padding: 12px;
+            .sidebar .closebtn {
+                width: 48px;
+                height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                -webkit-tap-highlight-color: transparent;
             }
 
-            /* Make tables more mobile-friendly */
-            .table-responsive {
-                margin: 0 -12px;
-                padding: 0 12px;
-            }
-
-            .table td, .table th {
-                padding: 8px;
-                font-size: 13px;
-            }
-
-            /* Improve form elements on mobile */
-            .form-control {
-                font-size: 16px;
-                padding: 8px 12px;
-            }
-
-            .btn {
+            .btn-outline-light,
+            .install-button {
+                min-height: 44px;
                 padding: 8px 16px;
                 font-size: 14px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .install-button i {
+                margin-right: 4px;
             }
         }
 
@@ -372,6 +376,39 @@
                 width: 48px;
                 height: 48px;
             }
+        }
+
+        /* Prevent text selection on buttons */
+        .btn,
+        .nav-link,
+        .sidebar a,
+        .openbtn,
+        .closebtn,
+        .install-button {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* Improve touch feedback */
+        .btn:active,
+        .nav-link:active,
+        .sidebar a:active,
+        .openbtn:active,
+        .closebtn:active,
+        .install-button:active {
+            opacity: 0.8;
+        }
+
+        /* Prevent zoom on input focus for iOS */
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="password"],
+        select,
+        textarea {
+            font-size: 16px !important;
         }
     </style>
 </head>
@@ -555,6 +592,81 @@
         // Hide install button if app is already installed
         window.addEventListener('appinstalled', () => {
             installButton.style.display = 'none';
+        });
+
+        // Improve mobile interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prevent double-tap zoom on buttons
+            const buttons = document.querySelectorAll('button, .btn, .nav-link, .sidebar a');
+            buttons.forEach(button => {
+                button.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    this.click();
+                }, { passive: false });
+            });
+
+            // Improve sidebar touch handling
+            const sidebar = document.getElementById('mySidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar && overlay) {
+                let touchStartX = 0;
+                let touchEndX = 0;
+
+                sidebar.addEventListener('touchstart', function(e) {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                sidebar.addEventListener('touchend', function(e) {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipe();
+                }, { passive: true });
+
+                function handleSwipe() {
+                    const swipeThreshold = 50;
+                    if (touchEndX < touchStartX - swipeThreshold) {
+                        // Swipe left - close sidebar
+                        closeNav();
+                    }
+                }
+
+                // Close sidebar when clicking overlay
+                overlay.addEventListener('click', closeNav);
+                overlay.addEventListener('touchstart', closeNav, { passive: true });
+            }
+
+            // Prevent body scroll when sidebar is open
+            function toggleNav() {
+                const sidebar = document.getElementById("mySidebar");
+                const overlay = document.getElementById("sidebarOverlay");
+                const main = document.getElementById("main");
+                
+                sidebar.classList.toggle("open");
+                main.classList.toggle("shifted");
+                
+                if (window.innerWidth <= 768) {
+                    if (sidebar.classList.contains("open")) {
+                        overlay.classList.add("active");
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        overlay.classList.remove("active");
+                        document.body.style.overflow = '';
+                    }
+                }
+            }
+
+            // Close sidebar on window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    const sidebar = document.getElementById("mySidebar");
+                    const overlay = document.getElementById("sidebarOverlay");
+                    if (sidebar.classList.contains("open")) {
+                        sidebar.classList.remove("open");
+                        overlay.classList.remove("active");
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
         });
     </script>
 </body>
