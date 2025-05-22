@@ -44,11 +44,36 @@
             right: 0;
             z-index: 1001;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .container-fluid {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0;
         }
 
         .navbar-brand {
-            font-size: 20px;
+            font-size: 1.25rem;
             font-weight: 500;
+            color: var(--text-color) !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .navbar-brand img {
+            height: 32px;
+            width: auto;
+            margin-right: 8px;
         }
 
         .btn-outline-light {
@@ -188,6 +213,29 @@
             .sidebar a {
                 margin: 0 8px;
             }
+            .navbar {
+                padding: 0 12px;
+            }
+            .navbar-brand {
+                font-size: 1.1rem;
+                max-width: 150px;
+            }
+            .navbar-brand img {
+                height: 28px;
+            }
+            .openbtn {
+                margin-right: 12px;
+            }
+        }
+
+        @media screen and (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1rem;
+                max-width: 120px;
+            }
+            .navbar-brand img {
+                height: 24px;
+            }
         }
 
         /* Install button styles */
@@ -277,9 +325,60 @@
                 font-size: 14px;
             }
         }
+
+        /* Sidebar improvements */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: var(--navbar-height);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+        }
+
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay {
+                display: block;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            /* Improve sidebar touch targets */
+            .sidebar a {
+                height: 48px;
+                margin: 4px 8px;
+            }
+
+            .sidebar .closebtn {
+                width: 48px;
+                height: 48px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Add overlay div -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeNav()"></div>
+
     <!-- Sidebar -->
     <div id="mySidebar" class="sidebar">
         <div class="sidebar-header">
@@ -367,30 +466,58 @@
     <script>
         function toggleNav() {
             const sidebar = document.getElementById("mySidebar");
+            const overlay = document.getElementById("sidebarOverlay");
             const main = document.getElementById("main");
+            
             sidebar.classList.toggle("open");
             main.classList.toggle("shifted");
+            
+            if (window.innerWidth <= 768) {
+                if (sidebar.classList.contains("open")) {
+                    overlay.classList.add("active");
+                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                } else {
+                    overlay.classList.remove("active");
+                    document.body.style.overflow = ''; // Restore scrolling
+                }
+            }
         }
 
         function closeNav() {
             const sidebar = document.getElementById("mySidebar");
+            const overlay = document.getElementById("sidebarOverlay");
             const main = document.getElementById("main");
+            
             sidebar.classList.remove("open");
             main.classList.remove("shifted");
+            overlay.classList.remove("active");
+            document.body.style.overflow = ''; // Restore scrolling
         }
 
         // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function(event) {
             const sidebar = document.getElementById("mySidebar");
             const openbtn = document.querySelector('.openbtn');
-            const main = document.getElementById("main");
+            const overlay = document.getElementById("sidebarOverlay");
             
             if (window.innerWidth <= 768 && 
                 !sidebar.contains(event.target) && 
                 !openbtn.contains(event.target) && 
                 sidebar.classList.contains("open")) {
-                sidebar.classList.remove("open");
-                main.classList.remove("shifted");
+                closeNav();
+            }
+        });
+
+        // Close sidebar on window resize if open
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                const sidebar = document.getElementById("mySidebar");
+                const overlay = document.getElementById("sidebarOverlay");
+                if (sidebar.classList.contains("open")) {
+                    sidebar.classList.remove("open");
+                    overlay.classList.remove("active");
+                    document.body.style.overflow = '';
+                }
             }
         });
 
