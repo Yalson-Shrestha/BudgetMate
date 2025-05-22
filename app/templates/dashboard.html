@@ -354,33 +354,145 @@
             overflow-y: auto;
         }
     }
+
+    /* Month selector styles */
+    .month-selector {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .month-selector select {
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        padding: 8px 16px;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+        min-width: 200px;
+    }
+
+    .month-selector select:focus {
+        border-color: #4285f4;
+        outline: none;
+    }
+
+    /* Delete button styles */
+    .delete-transaction {
+        color: #ea4335;
+        background: none;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .delete-transaction:hover {
+        background-color: #fce8e6;
+    }
+
+    .delete-transaction i {
+        font-size: 14px;
+    }
+
+    /* Confirmation modal styles */
+    .modal-content {
+        border-radius: 12px;
+        border: none;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #e0e0e0;
+        padding: 16px 24px;
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #e0e0e0;
+        padding: 16px 24px;
+    }
+
+    .btn-danger {
+        background-color: #ea4335;
+        border: none;
+        padding: 8px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .btn-danger:hover {
+        background-color: #d33426;
+    }
+
+    .btn-secondary {
+        background-color: #f1f1f1;
+        border: none;
+        color: #0f0f0f;
+        padding: 8px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .btn-secondary:hover {
+        background-color: #e0e0e0;
+    }
+
+    @media (max-width: 768px) {
+        .month-selector {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+
+        .month-selector select {
+            width: 100%;
+        }
+    }
 </style>
 
 <div class="dashboard-container">
     <div class="dashboard-header">
-        <h2>Dashboard - {{ current_month }}</h2>
-        <p class="text-muted" style="margin-top: 8px; font-size: 14px;">
-            <i class="fas fa-clock me-1"></i>Last updated: {{ now.strftime('%Y-%m-%d %H:%M:%S') }}
-        </p>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h2>Dashboard</h2>
+                <p class="text-muted" style="margin-top: 8px; font-size: 14px;">
+                    <i class="fas fa-clock me-1"></i>Last updated: {{ now.strftime('%Y-%m-%d %H:%M:%S') }}
+                </p>
+            </div>
+            <form method="GET" action="{{ url_for('main.index') }}" class="month-selector">
+                <select name="month" class="form-select" onchange="this.form.submit()">
+                    {% for month in available_months %}
+                    <option value="{{ month.strftime('%Y-%m') }}" {% if month.strftime('%Y-%m') == selected_month %}selected{% endif %}>
+                        {{ month.strftime('%B %Y') }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
     </div>
 
     <!-- Monthly Summary Cards -->
     <div class="row g-3">
         <div class="col-12 col-sm-6 col-md-3">
             <div class="summary-card income">
-                <h5 class="card-title">{{ current_month }} Income</h5>
+                <h5 class="card-title">{{ selected_month_name }} Income</h5>
                 <p class="card-value">₨ {{ "%.2f"|format(monthly_income) }}</p>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-3">
             <div class="summary-card expenses">
-                <h5 class="card-title">{{ current_month }} Expenses</h5>
+                <h5 class="card-title">{{ selected_month_name }} Expenses</h5>
                 <p class="card-value">₨ {{ "%.2f"|format(monthly_expenses) }}</p>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-3">
             <div class="summary-card balance">
-                <h5 class="card-title">{{ current_month }} Balance</h5>
+                <h5 class="card-title">{{ selected_month_name }} Balance</h5>
                 <p class="card-value">₨ {{ "%.2f"|format(monthly_balance) }}</p>
             </div>
         </div>
@@ -442,7 +554,7 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" id="monthly-tab" data-bs-toggle="tab" href="#monthly" role="tab">
-                <i class="fas fa-calendar-alt me-2"></i>{{ current_month }} Transactions
+                <i class="fas fa-calendar-alt me-2"></i>{{ selected_month_name }} Transactions
             </a>
         </li>
     </ul>
@@ -460,6 +572,7 @@
                                 <th>Category</th>
                                 <th>Type</th>
                                 <th>Note</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -474,6 +587,12 @@
                                     </span>
                                 </td>
                                 <td>{{ t.note }}</td>
+                                <td>
+                                    <button class="delete-transaction" 
+                                            onclick="confirmDelete({{ t.id }}, '{{ t.date.strftime('%H:%M') }}', '{{ t.amount }}', '{{ t.category }}')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -494,6 +613,7 @@
                                 <th>Category</th>
                                 <th>Type</th>
                                 <th>Note</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -508,10 +628,43 @@
                                     </span>
                                 </td>
                                 <td>{{ t.note }}</td>
+                                <td>
+                                    <button class="delete-transaction" 
+                                            onclick="confirmDelete({{ t.id }}, '{{ t.date.strftime('%Y-%m-%d') }}', '{{ t.amount }}', '{{ t.category }}')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Transaction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this transaction?</p>
+                    <div class="transaction-details">
+                        <p><strong>Date:</strong> <span id="deleteDate"></span></p>
+                        <p><strong>Amount:</strong> ₨ <span id="deleteAmount"></span></p>
+                        <p><strong>Category:</strong> <span id="deleteCategory"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" method="POST" action="{{ url_for('main.delete_transaction') }}" style="display: inline;">
+                        <input type="hidden" name="transaction_id" id="deleteTransactionId">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -531,5 +684,43 @@
 
     // Refresh the page every minute to update the daily transactions
     setInterval(refreshPage, 60000);
+
+    // Delete transaction confirmation
+    function confirmDelete(id, date, amount, category) {
+        document.getElementById('deleteTransactionId').value = id;
+        document.getElementById('deleteDate').textContent = date;
+        document.getElementById('deleteAmount').textContent = amount;
+        document.getElementById('deleteCategory').textContent = category;
+        
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+    }
+
+    // Handle form submission for delete
+    document.getElementById('deleteForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting transaction: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the transaction');
+        });
+    });
 </script>
 {% endblock %}
