@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_login import LoginManager
 from flask_session import Session
 import os
@@ -48,6 +48,27 @@ def create_app():
     # Create database tables
     with app.app_context():
         db.create_all()
+
+    # Add template filter for mobile detection
+    @app.template_filter('mobile_template')
+    def mobile_template(template_name):
+        if is_mobile():
+            # Try to load mobile-specific template first
+            mobile_template = f"mobile/{template_name}"
+            try:
+                app.jinja_env.get_template(mobile_template)
+                return mobile_template
+            except:
+                return template_name
+        return template_name
+
+    def is_mobile():
+        user_agent = request.headers.get('User-Agent', '').lower()
+        mobile_agents = ['iphone', 'android', 'mobile', 'tablet', 'ipad']
+        return any(agent in user_agent for agent in mobile_agents)
+
+    # Register the function to be available in templates
+    app.jinja_env.globals.update(is_mobile=is_mobile)
 
     return app
 

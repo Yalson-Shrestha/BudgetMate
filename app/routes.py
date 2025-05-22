@@ -74,7 +74,10 @@ def index():
     daily_income = sum(t.amount for t in daily_transactions if t.type == 'income')
     daily_expenses = sum(t.amount for t in daily_transactions if t.type == 'expense')
 
-    return render_template('dashboard.html',
+    # Choose template based on device
+    template = 'mobile/dashboard.html' if request.headers.get('User-Agent', '').lower() in ['iphone', 'android', 'mobile', 'tablet', 'ipad'] else 'dashboard.html'
+
+    return render_template(template,
                          monthly_transactions=monthly_transactions,
                          daily_transactions=daily_transactions,
                          monthly_income=monthly_income,

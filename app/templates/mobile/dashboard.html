@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .mobile-dashboard {
+        padding: 16px;
+    }
+
+    .mobile-summary-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .mobile-summary-card .title {
+        font-size: 14px;
+        color: #606060;
+        margin-bottom: 8px;
+    }
+
+    .mobile-summary-card .value {
+        font-size: 20px;
+        font-weight: 500;
+        color: #0f0f0f;
+    }
+
+    .mobile-summary-card.income { border-left: 4px solid #34a853; }
+    .mobile-summary-card.expenses { border-left: 4px solid #ea4335; }
+    .mobile-summary-card.balance { border-left: 4px solid #4285f4; }
+    .mobile-summary-card.daily { border-left: 4px solid #fbbc05; }
+
+    .mobile-transaction-list {
+        margin-top: 24px;
+    }
+
+    .mobile-transaction-item {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .mobile-transaction-info {
+        flex: 1;
+    }
+
+    .mobile-transaction-category {
+        font-size: 14px;
+        color: #606060;
+        margin-bottom: 4px;
+    }
+
+    .mobile-transaction-amount {
+        font-size: 16px;
+        font-weight: 500;
+        color: #0f0f0f;
+    }
+
+    .mobile-transaction-date {
+        font-size: 12px;
+        color: #606060;
+    }
+
+    .mobile-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 56px;
+        height: 56px;
+        border-radius: 28px;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        text-decoration: none;
+        font-size: 24px;
+    }
+
+    .mobile-month-selector {
+        margin-bottom: 16px;
+    }
+
+    .mobile-month-selector select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        background: white;
+        font-size: 16px;
+    }
+</style>
+
+<div class="mobile-dashboard">
+    <div class="mobile-month-selector">
+        <form method="GET" action="{{ url_for('main.index') }}">
+            <select name="month" class="form-select" onchange="this.form.submit()">
+                {% for month in available_months %}
+                <option value="{{ month.strftime('%Y-%m') }}" {% if month.strftime('%Y-%m') == selected_month %}selected{% endif %}>
+                    {{ month.strftime('%B %Y') }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="mobile-summary-card income">
+        <div class="title">{{ selected_month_name }} Income</div>
+        <div class="value">₨ {{ "%.2f"|format(monthly_income) }}</div>
+    </div>
+
+    <div class="mobile-summary-card expenses">
+        <div class="title">{{ selected_month_name }} Expenses</div>
+        <div class="value">₨ {{ "%.2f"|format(monthly_expenses) }}</div>
+    </div>
+
+    <div class="mobile-summary-card balance">
+        <div class="title">{{ selected_month_name }} Balance</div>
+        <div class="value">₨ {{ "%.2f"|format(monthly_balance) }}</div>
+    </div>
+
+    <div class="mobile-summary-card daily">
+        <div class="title">Today's Summary</div>
+        <div class="value">
+            Income: ₨ {{ "%.2f"|format(daily_income) }}<br>
+            Expenses: ₨ {{ "%.2f"|format(daily_expenses) }}
+        </div>
+    </div>
+
+    <!-- Transactions List -->
+    <div class="mobile-transaction-list">
+        <h3 style="margin-bottom: 16px; font-size: 18px;">Recent Transactions</h3>
+        {% for transaction in monthly_transactions[:10] %}
+        <div class="mobile-transaction-item">
+            <div class="mobile-transaction-info">
+                <div class="mobile-transaction-category">{{ transaction.category }}</div>
+                <div class="mobile-transaction-amount">₨ {{ "%.2f"|format(transaction.amount) }}</div>
+                <div class="mobile-transaction-date">{{ transaction.date.strftime('%Y-%m-%d %H:%M') }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Floating Action Button -->
+    <a href="{{ url_for('main.add_transaction') }}" class="mobile-fab">
+        <i class="fas fa-plus"></i>
+    </a>
+</div>
+{% endblock %} 
