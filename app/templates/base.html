@@ -366,6 +366,29 @@
                 font-size: 1.1rem;
             }
         }
+        .auth-container {
+            max-width: 400px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+            padding: 32px 24px;
+        }
+        .auth-form h2 {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .auth-switch {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.95em;
+        }
+        @media (max-width: 600px) {
+            .auth-container {
+                padding: 18px 6px;
+                border-radius: 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -599,6 +622,18 @@
             openbtn.addEventListener('click', function() {
                 console.log('Menu button clicked');
                 console.log('Sidebar classes:', sidebar.classList.toString());
+            });
+
+            // Auth form validation
+            var forms = document.querySelectorAll('.auth-form');
+            Array.prototype.slice.call(forms).forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        form.classList.add('was-validated');
+                    }
+                }, false);
             });
         });
     </script>
