@@ -288,3 +288,19 @@ def delete_account():
         current_app.logger.error(traceback.format_exc())
         flash('An error occurred while deleting your account. Please try again.', 'error')
         return redirect(url_for('main.index'))
+
+# === TEMPORARY ADMIN ROUTES: REMOVE AFTER USE FOR SECURITY ===
+@main.route('/admin/delete_all', methods=['POST'])
+def admin_delete_all():
+    from .models import db, User, Transaction
+    Transaction.query.delete()
+    User.query.delete()
+    db.session.commit()
+    return "All users and transactions deleted!"
+
+@main.route('/admin/list_emails')
+def admin_list_emails():
+    from .models import User
+    emails = [user.email for user in User.query.all()]
+    return '<br>'.join(emails)
+# === END TEMPORARY ADMIN ROUTES ===
