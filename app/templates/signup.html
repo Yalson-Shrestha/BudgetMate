@@ -2,6 +2,7 @@
 {% block content %}
 <div class="auth-container">
   <form method="POST" class="auth-form" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <h2>Sign Up</h2>
     <div class="mb-3">
       <label for="username">Username</label>
