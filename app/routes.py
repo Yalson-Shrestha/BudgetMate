@@ -268,3 +268,23 @@ def delete_transaction():
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500
+
+@main.route('/delete_account', methods=['POST'])
+@login_required
+def delete_account():
+    try:
+        # Delete all transactions for the user
+        Transaction.query.filter_by(user_id=current_user.id).delete()
+        # Delete the user
+        user = User.query.get(current_user.id)
+        db.session.delete(user)
+        db.session.commit()
+        logout_user()
+        flash('Your account and all associated data have been deleted.', 'success')
+        return redirect(url_for('main.signup'))
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error deleting account: {e}')
+        current_app.logger.error(traceback.format_exc())
+        flash('An error occurred while deleting your account. Please try again.', 'error')
+        return redirect(url_for('main.index'))
