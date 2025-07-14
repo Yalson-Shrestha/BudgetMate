@@ -4,6 +4,7 @@ from flask_session import Session
 import os
 from dotenv import load_dotenv
 from .models import db, User
+from flask_wtf import CSRFProtect
 
 load_dotenv()
 
@@ -36,6 +37,7 @@ def create_app():
     Session(app)  # Initialize Flask-Session
     login_manager = LoginManager(app)
     login_manager.login_view = 'main.login'
+    csrf = CSRFProtect(app)
 
     @login_manager.user_loader
     def load_user(user_id):
