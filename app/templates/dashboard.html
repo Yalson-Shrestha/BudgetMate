@@ -973,9 +973,15 @@
         submitButton.disabled = true;
         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
+        var formData = new FormData(form);
+        // Add this line if not already present:
+        if (!formData.has('csrf_token')) {
+            formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+        }
+
         fetch(form.action, {
             method: 'POST',
-            body: new FormData(form),
+            body: formData,
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
@@ -1056,6 +1062,8 @@
         formData.append('category', category);
         formData.append('type', type);
         formData.append('note', note);
+        // Add this line:
+        formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
         fetch('/update_transaction', {
             method: 'POST',
             body: formData,
