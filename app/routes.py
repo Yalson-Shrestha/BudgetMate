@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import login_user, login_required, logout_user, current_user
-from .models import db, User, Transaction
+from .models import db, User, Transaction, Category
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, datetime, timedelta
 from sqlalchemy import extract, func
@@ -77,6 +77,13 @@ def index():
     # Choose template based on device
     template = 'mobile/dashboard.html' if request.headers.get('User-Agent', '').lower() in ['iphone', 'android', 'mobile', 'tablet', 'ipad'] else 'dashboard.html'
 
+    # Fetch categories for the dropdown (default + custom)
+    default_categories = [
+        '🍔 Food', '🚌 Transport', '🏠 Rent', '🏥 Health', '🛍️ Shopping', '📚 Education'
+    ]
+    custom_categories = [c.name for c in Category.query.filter_by(user_id=current_user.id).all()]
+    all_categories = default_categories + [c for c in custom_categories if c not in default_categories]
+
     return render_template(template,
                          monthly_transactions=monthly_transactions,
                          daily_transactions=daily_transactions,
@@ -89,7 +96,8 @@ def index():
                          today=today,
                          selected_month=selected_month,
                          selected_month_name=selected_date.strftime('%B %Y'),
-                         available_months=available_months)
+                         available_months=available_months,
+                         categories=all_categories)
 
 @main.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -164,6 +172,15 @@ def add_transaction():
             flash('Invalid transaction type', 'error')
             return redirect(url_for('main.index'))
 
+        # Save new category if not in default or custom
+        default_categories = [
+            '🍔 Food', '🚌 Transport', '🏠 Rent', '🏥 Health', '🛍️ Shopping', '📚 Education'
+        ]
+        existing = Category.query.filter_by(user_id=current_user.id, name=category).first()
+        if category not in default_categories and not existing:
+            db.session.add(Category(name=category, user_id=current_user.id))
+            db.session.commit()
+
         # Create and save transaction
         transaction = Transaction(
             amount=float(amount),
@@ -188,13 +205,39 @@ def add_transaction():
     
     return redirect(url_for('main.index'))
 
+@main.route('/update_transaction', methods=['POST'])
+@login_required
+def update_transaction():
+    transaction_id = request.form.get('transaction_id')
+    amount = request.form.get('amount')
+    category = request.form.get('category')
+    type_ = request.form.get('type')
+    note = request.form.get('note', '')
+
+    if not transaction_id or not amount or not category or not type_:
+        return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+
+    try:
+        transaction = Transaction.query.filter_by(id=transaction_id, user_id=current_user.id).first()
+        if not transaction:
+            return jsonify({'success': False, 'message': 'Transaction not found'}), 404
+        transaction.amount = float(amount)
+        transaction.category = category
+        transaction.type = type_
+        transaction.note = note
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @main.route('/chart')
 @login_required
 def chart():
     # Get current month's transactions
     current_month = date.today().month
     current_year = date.today().year
-    
+
     # Get category-wise monthly expenses
     category_expenses = db.session.query(
         Transaction.category,
@@ -205,10 +248,8 @@ def chart():
         extract('month', Transaction.date) == current_month,
         extract('year', Transaction.date) == current_year
     ).group_by(Transaction.category).all()
-    
-    # Convert expense data to list of lists for JSON serialization
     expense_data = [[row[0], float(row[1])] for row in category_expenses]
-    
+
     # Get category-wise monthly income
     category_income = db.session.query(
         Transaction.category,
@@ -219,14 +260,46 @@ def chart():
         extract('month', Transaction.date) == current_month,
         extract('year', Transaction.date) == current_year
     ).group_by(Transaction.category).all()
-    
-    # Convert income data to list of lists for JSON serialization
     income_data = [[row[0], float(row[1])] for row in category_income]
-    
+
+    # Get monthly income and expense totals for the last 12 months
+    monthly_totals = []
+    for i in range(11, -1, -1):
+        month_date = datetime(current_year, current_month, 1) - timedelta(days=30*i)
+        year = month_date.year
+        month = month_date.month
+        # Income
+        income = db.session.query(func.sum(Transaction.amount)).filter(
+            Transaction.user_id == current_user.id,
+            Transaction.type == 'income',
+            extract('month', Transaction.date) == month,
+            extract('year', Transaction.date) == year
+        ).scalar() or 0
+        # Expense
+        expense = db.session.query(func.sum(Transaction.amount)).filter(
+            Transaction.user_id == current_user.id,
+            Transaction.type == 'expense',
+            extract('month', Transaction.date) == month,
+            extract('year', Transaction.date) == year
+        ).scalar() or 0
+        monthly_totals.append({
+            'month': month_date.strftime('%b'),
+            'year': year,
+            'income': float(income),
+            'expense': float(expense)
+        })
+
+    # Current month income/expense for progress bar
+    current_month_income = sum([row[1] for row in income_data])
+    current_month_expense = sum([row[1] for row in expense_data])
+
     return render_template('chart.html',
         category_expenses=expense_data,
         category_income=income_data,
-        current_month=datetime(current_year, current_month, 1).strftime('%B %Y')
+        current_month=datetime(current_year, current_month, 1).strftime('%B %Y'),
+        monthly_totals=monthly_totals,
+        current_month_income=current_month_income,
+        current_month_expense=current_month_expense
     )
 
 @main.route('/help')

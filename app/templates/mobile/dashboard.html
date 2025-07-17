@@ -139,11 +139,14 @@
     <div class="mobile-transaction-list">
         <h3 style="margin-bottom: 16px; font-size: 18px;">Recent Transactions</h3>
         {% for transaction in monthly_transactions[:10] %}
-        <div class="mobile-transaction-item">
-            <div class="mobile-transaction-info">
+        <div class="mobile-transaction-item" id="mobile-transaction-{{ transaction.id }}">
+            <div class="mobile-transaction-info" id="mobile-info-{{ transaction.id }}">
                 <div class="mobile-transaction-category">{{ transaction.category }}</div>
                 <div class="mobile-transaction-amount">₨ {{ "%.2f"|format(transaction.amount) }}</div>
                 <div class="mobile-transaction-date">{{ transaction.date.strftime('%Y-%m-%d %H:%M') }}</div>
+            </div>
+            <div>
+                <button onclick="editMobileTransaction({{ transaction.id }}, '{{ transaction.amount }}', '{{ transaction.category }}', '{{ transaction.type }}', '{{ transaction.note|escape }}')" style="background:none;border:none;cursor:pointer;" title="Edit">✏️</button>
             </div>
         </div>
         {% endfor %}
@@ -155,3 +158,74 @@
     </a>
 </div>
 {% endblock %} 
+<script>
+function editMobileTransaction(id, amount, category, type, note) {
+    var infoDiv = document.getElementById('mobile-info-' + id);
+    if (!infoDiv) return;
+    infoDiv.innerHTML = `
+        <div style='margin-bottom:8px;'>
+            <input type='number' min='0.01' step='0.01' id='edit-m-amount-${id}' value='${amount}' class='form-control' style='max-width:100px;'>
+        </div>
+        <div style='margin-bottom:8px;'>
+            <select id='edit-m-category-${id}' class='form-control'>
+                <option value='🍔 Food' ${category === '🍔 Food' ? 'selected' : ''}>🍔 Food</option>
+                <option value='🚌 Transport' ${category === '🚌 Transport' ? 'selected' : ''}>🚌 Transport</option>
+                <option value='🏠 Rent' ${category === '🏠 Rent' ? 'selected' : ''}>🏠 Rent</option>
+                <option value='🏥 Health' ${category === '🏥 Health' ? 'selected' : ''}>🏥 Health</option>
+                <option value='🛍️ Shopping' ${category === '🛍️ Shopping' ? 'selected' : ''}>🛍️ Shopping</option>
+                <option value='📚 Education' ${category === '📚 Education' ? 'selected' : ''}>📚 Education</option>
+            </select>
+        </div>
+        <div style='margin-bottom:8px;display:flex;gap:8px;'>
+            <button type='button' class='btn btn-outline-success btn-sm' id='edit-m-type-income-${id}' onclick='setEditMobileType("income", ${id})' style='${type === 'income' ? 'background:#e6f4ea;color:#34a853;' : ''}'>Income</button>
+            <button type='button' class='btn btn-outline-danger btn-sm' id='edit-m-type-expense-${id}' onclick='setEditMobileType("expense", ${id})' style='${type === 'expense' ? 'background:#fce8e6;color:#ea4335;' : ''}'>Expense</button>
+            <input type='hidden' id='edit-m-type-${id}' value='${type}'>
+        </div>
+        <div style='margin-bottom:8px;'>
+            <input type='text' id='edit-m-note-${id}' value='${note || ''}' class='form-control' placeholder='Note'>
+        </div>
+        <div style='display:flex;gap:8px;'>
+            <button class='btn btn-success btn-sm' onclick='saveMobileEdit("' + id + '")' title='Save'>✅</button>
+            <button class='btn btn-secondary btn-sm' onclick='cancelMobileEdit()' title='Cancel'>❌</button>
+        </div>
+    `;
+}
+function setEditMobileType(type, id) {
+    document.getElementById('edit-m-type-' + id).value = type;
+    document.getElementById('edit-m-type-income-' + id).style.background = type === 'income' ? '#e6f4ea' : '';
+    document.getElementById('edit-m-type-income-' + id).style.color = type === 'income' ? '#34a853' : '';
+    document.getElementById('edit-m-type-expense-' + id).style.background = type === 'expense' ? '#fce8e6' : '';
+    document.getElementById('edit-m-type-expense-' + id).style.color = type === 'expense' ? '#ea4335' : '';
+}
+function saveMobileEdit(id) {
+    var amount = document.getElementById('edit-m-amount-' + id).value;
+    var category = document.getElementById('edit-m-category-' + id).value;
+    var type = document.getElementById('edit-m-type-' + id).value;
+    var note = document.getElementById('edit-m-note-' + id).value;
+    var formData = new FormData();
+    formData.append('transaction_id', id);
+    formData.append('amount', amount);
+    formData.append('category', category);
+    formData.append('type', type);
+    formData.append('note', note);
+    fetch('/update_transaction', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error updating transaction: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('An error occurred while updating the transaction');
+    });
+}
+function cancelMobileEdit() {
+    location.reload();
+}
+</script> 

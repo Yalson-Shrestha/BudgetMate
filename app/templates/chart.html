@@ -5,6 +5,39 @@
     <!-- Optional: Page Title or Remove if Not Needed -->
     <h2 class="text-center mb-5">Spending & Income Analysis</h2>
 
+    <!-- Monthly Budget Progress Bar -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-12 col-md-8">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-2">Monthly Budget Progress</h5>
+                    <div id="progress-bar-container">
+                        <!-- Progress bar and message will be rendered by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Income/Expense Bar Chart -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-12 col-md-10">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Monthly Income & Expenses</h5>
+                    <canvas id="monthlyBarChart" height="100"></canvas>
+                </div>
+            </div>
+            <!-- Savings Trend Line Chart -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Savings Trend</h5>
+                    <canvas id="savingsLineChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <!-- Expense Column -->
         <div class="col-md-6 mb-5">
@@ -47,6 +80,9 @@
 <script>
     const expenseData = {{ category_expenses|tojson }};
     const incomeData = {{ category_income|tojson }};
+    const monthlyTotals = {{ monthly_totals|tojson }};
+    const currentMonthIncome = {{ current_month_income|tojson }};
+    const currentMonthExpense = {{ current_month_expense|tojson }};
 
     function createChart(ctxId, data, type, tableId) {
         const ctx = document.getElementById(ctxId).getContext('2d');
@@ -102,5 +138,126 @@
 
     createChart("expenseChart", expenseData, "expense", "expenseTable");
     createChart("incomeChart", incomeData, "income", "incomeTable");
+
+    // Monthly Income/Expense Bar Chart
+    const barLabels = monthlyTotals.map(m => m.month);
+    const barIncome = monthlyTotals.map(m => m.income);
+    const barExpense = monthlyTotals.map(m => m.expense);
+    const barCtx = document.getElementById('monthlyBarChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: barLabels,
+            datasets: [
+                {
+                    label: 'Income',
+                    data: barIncome,
+                    backgroundColor: '#34d399',
+                },
+                {
+                    label: 'Expense',
+                    data: barExpense,
+                    backgroundColor: '#f87171',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ₨ ${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: false,
+                    title: { display: true, text: 'Month' }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Amount (₨)' }
+                }
+            }
+        }
+    });
+
+    // Savings Trend Line Chart
+    const savingsData = monthlyTotals.map(m => m.income - m.expense);
+    const savingsCtx = document.getElementById('savingsLineChart').getContext('2d');
+    new Chart(savingsCtx, {
+        type: 'line',
+        data: {
+            labels: barLabels,
+            datasets: [{
+                label: 'Savings',
+                data: savingsData,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99,102,241,0.1)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: '#6366f1',
+                pointBorderColor: '#6366f1',
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Savings: Rs ${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Month' }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Amount (Rs)' }
+                }
+            }
+        }
+    });
+
+    // Render Monthly Budget Progress Bar
+    (function renderProgressBar() {
+        const container = document.getElementById('progress-bar-container');
+        let percent = 0;
+        let color = '#34d399';
+        let message = 'Good job! You\'re managing your budget well.';
+        if (currentMonthIncome > 0) {
+            percent = Math.round((currentMonthExpense / currentMonthIncome) * 1000) / 10;
+        }
+        let ratio = currentMonthIncome > 0 ? currentMonthExpense / currentMonthIncome : 0;
+        if (ratio > 1) {
+            color = '#f87171';
+            message = "You're overspending. Try cutting expenses.";
+        } else if (ratio > 0.9) {
+            color = '#fbbf24';
+            message = "Careful! You're close to overspending.";
+        } else {
+            color = '#34d399';
+            message = "Good job! You're managing your budget well.";
+        }
+        container.innerHTML = `
+            <div class='w-100' style='background:#e5e7eb;height:24px;border-radius:12px;overflow:hidden;'>
+                <div style='height:24px;width:${percent > 100 ? 100 : percent}%;background:${color};transition:width 0.5s;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:white;font-weight:500;'>
+                    ${percent}%
+                </div>
+            </div>
+            <div class='mt-2 text-center' style='color:${color};font-weight:500;'>${message}</div>
+        `;
+    })();
 </script>
 {% endblock %}
